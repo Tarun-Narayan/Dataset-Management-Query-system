@@ -1,0 +1,15 @@
+{
+	"title": "Order key is not in Columns",
+	"input": {
+		"WHERE": {},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_avg"
+			],
+			"ORDER": "sections_year"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

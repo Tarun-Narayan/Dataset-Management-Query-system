@@ -1,0 +1,57 @@
+{
+	"title": "Query using or logic",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"LT": {
+						"sections_avg": 5
+					}
+				},
+				{
+					"GT": {
+						"sections_avg": 98
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"sections_dept":"busi"},
+		{"sections_dept":"busi"},
+		{"sections_dept":"cnps"},
+		{"sections_dept":"eece"},
+		{"sections_dept":"eece"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"epse"},
+		{"sections_dept":"fopr"},
+		{"sections_dept":"frst"},
+		{"sections_dept":"lfs"},
+		{"sections_dept":"lfs"},
+		{"sections_dept":"math"},
+		{"sections_dept":"math"},
+		{"sections_dept":"nurs"},
+		{"sections_dept":"nurs"},
+		{"sections_dept":"nurs"},
+		{"sections_dept":"nurs"},
+		{"sections_dept":"nurs"},
+		{"sections_dept":"nurs"},
+		{"sections_dept":"nurs"},
+		{"sections_dept":"nurs"},
+		{"sections_dept":"spph"},
+		{"sections_dept":"spph"},
+		{"sections_dept":"wood"}]
+}

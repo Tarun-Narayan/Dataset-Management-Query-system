@@ -1645,7 +1645,7 @@ eslint-module-utils@^2.8.0:
   dependencies:
     debug "^3.2.7"
 
-eslint-plugin-descriptive@1.4.1:
+eslint-plugin-descriptive@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/eslint-plugin-descriptive/-/eslint-plugin-descriptive-1.4.1.tgz#61e19afa5d642dec08e422d8190bfefbd245e438"
   integrity sha512-+GW0bv0x+42OHIfViBnXB3kOe6bpJSc01ePK8AbcPVkZ+g6SWMDdIi74BLjnTuSsR3c0TQtRtiuKOaRft0uLYw==

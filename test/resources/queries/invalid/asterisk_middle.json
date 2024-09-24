@@ -1,0 +1,15 @@
+{
+	"title": "Query has asterisk in invalid spot",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"ubc_dept": "Aste*risk"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [ "sections_avg" ]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

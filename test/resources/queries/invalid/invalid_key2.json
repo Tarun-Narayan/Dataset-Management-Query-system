@@ -1,0 +1,11 @@
+{
+	"title": "Query key is invalid",
+	"input": {
+		"WHERE": {},
+		"OPTIONS": {
+			"COLUMNS": ["sections_prof"]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

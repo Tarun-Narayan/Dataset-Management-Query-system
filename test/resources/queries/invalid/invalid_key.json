@@ -1,0 +1,11 @@
+{
+	"title": "Query key cannot be empty string",
+	"input": {
+		"WHERE": {},
+		"OPTIONS": {
+			"COLUMNS": [""]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

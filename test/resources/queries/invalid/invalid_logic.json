@@ -1,0 +1,21 @@
+{
+	"title": "Query logic is not valid",
+	"input": {
+		"WHERE": {
+			"BUT": [
+				{
+					"IS": {
+						"sections_dept": "*at*"
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept"
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}
