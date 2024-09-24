@@ -1,0 +1,17 @@
+{
+	"title": "Dataset has not been added yet",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"ubc_avg": 97
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"ubc_dept"
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}
