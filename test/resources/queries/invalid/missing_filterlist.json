@@ -2,7 +2,7 @@
 	"title": "Query missing filter list",
 	"input": {
 		"WHERE": {
-			"AND": []
+			"AND": [{}]
 		},
 		"OPTIONS": {
 			"COLUMNS": [
