@@ -187,15 +187,15 @@ async function validateInputString(string: string): Promise<boolean> {
 }
 // end adapted from chatGPT
 
-export async function getResults(query: Query): Promise<InsightResult[]> {
-	let getID = "";
-	const keyToParse = query.OPTIONS.COLUMNS[0];
-	let index = 0;
-	while (keyToParse[index] !== "_") {
-		getID += keyToParse[index];
-		index++;
-	}
-	const id = getID;
+export async function getResults(_query: Query): Promise<InsightResult[]> {
+	// let getID = "";
+	// const keyToParse = query.OPTIONS.COLUMNS[0];
+	// let index = 0;
+	// while (keyToParse[index] !== "_") {
+	// 	getID += keyToParse[index];
+	// 	index++;
+	// }
+	// const id = getID;
 
 	return [];
 }
