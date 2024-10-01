@@ -4,11 +4,14 @@ import {
 	InsightDatasetKind,
 	InsightResult,
 	InsightError,
-	NotFoundError,
+	ResultTooLargeError,
+  NotFoundError,
 } from "./IInsightFacade";
 import { validateDataset, parseZipFile, processSections, saveDataset, getStoredDatasetIds } from "./ZipDecoder";
+import { Query, validateQuery, getResults } from "./Query";
 import path from "node:path";
 import * as fs from "fs-extra";
+
 
 /**
  * This is the main programmatic entry point for the project.
@@ -72,8 +75,25 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		// TODO: Remove this once you implement the methods!
-		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
+		if (typeof query === "object") {
+			let result: InsightResult[];
+			let valid: boolean;
+			try {
+				valid = await validateQuery(query as Query);
+				if (valid) {
+					try {
+						result = await getResults(query as Query);
+						return result;
+					} catch (err) {
+						return Promise.reject(err as ResultTooLargeError);
+					}
+				}
+				return Promise.reject(new InsightError("Invalid query syntax"));
+			} catch (err) {
+				return Promise.reject(err as InsightError);
+			}
+		}
+		return Promise.reject(new InsightError("Query not an object"));
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
