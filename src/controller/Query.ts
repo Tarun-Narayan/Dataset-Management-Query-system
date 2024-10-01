@@ -197,6 +197,5 @@ export async function getResults(query: Query): Promise<InsightResult[]> {
 	}
 	const id = getID;
 
-
 	return [];
 }
