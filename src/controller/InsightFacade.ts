@@ -5,21 +5,18 @@ import {
 	InsightResult,
 	InsightError,
 	ResultTooLargeError,
-  NotFoundError,
+	NotFoundError,
 } from "./IInsightFacade";
 import { validateDataset, parseZipFile, processSections, saveDataset, getStoredDatasetIds } from "./ZipDecoder";
 import { Query, validateQuery, getResults } from "./Query";
 import path from "node:path";
 import * as fs from "fs-extra";
 
-
 /**
  * This is the main programmatic entry point for the project.
  * Method documentation is in IInsightFacade
  *
  */
-// const datasets = new Map<string, { id: string; kind: InsightDatasetKind }>();
-
 export default class InsightFacade implements IInsightFacade {
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {

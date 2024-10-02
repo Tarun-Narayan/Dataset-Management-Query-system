@@ -1,4 +1,6 @@
 import { InsightError, InsightResult } from "./IInsightFacade";
+import path from "path";
+import * as fs from "fs-extra";
 
 export interface Query extends Object {
 	WHERE: Filter;
@@ -131,7 +133,7 @@ async function validateOptions(options: Options): Promise<boolean> {
 	if (options.COLUMNS.length === 0 || !Array.isArray(options.COLUMNS)) {
 		throw new InsightError("Option COLUMNS not formatted correctly");
 	}
-	// start chatGPT for help iterating with promises
+	// start chatGPT for help iterating with promises and Linting
 	const validationResults = await Promise.all(
 		options.COLUMNS.map(async (key) => {
 			return Promise.any([validateSKey(key), validateMKey(key)]).catch(() => false);
@@ -188,14 +190,30 @@ async function validateInputString(string: string): Promise<boolean> {
 // end adapted from chatGPT
 
 export async function getResults(query: Query): Promise<InsightResult[]> {
-	let getID = "";
-	const keyToParse = query.OPTIONS.COLUMNS[0];
-	let index = 0;
-	while (keyToParse[index] !== "_") {
-		getID += keyToParse[index];
-		index++;
-	}
-	const id = getID;
+	const dataset = await getDataset(query);
 
-	return [];
+	const result: InsightResult = {
+		id: dataset.sections,
+	};
+
+	return [result];
+}
+
+async function getDataset(query: Query): Promise<any> {
+	try {
+		let getID = "";
+		const keyToParse = query.OPTIONS.COLUMNS[0];
+		let index = 0;
+
+		while (keyToParse[index] !== "_") {
+			getID += keyToParse[index];
+			index++;
+		}
+
+		const id = getID;
+		const filePath = path.join("./data", `${id}.json`);
+		return await fs.readJson(filePath);
+	} catch {
+		throw new InsightError("Referenced dataset ID had not been added yet");
+	}
 }
