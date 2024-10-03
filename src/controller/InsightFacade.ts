@@ -8,7 +8,8 @@ import {
 	NotFoundError,
 } from "./IInsightFacade";
 import { validateDataset, parseZipFile, processSections, saveDataset, getStoredDatasetIds } from "./ZipDecoder";
-import { Query, validateQuery, getResults } from "./Query";
+import { Query, validateQuery } from "./Query";
+import { getResults } from "./GetResults";
 import path from "node:path";
 import * as fs from "fs-extra";
 
@@ -17,13 +18,15 @@ import * as fs from "fs-extra";
  * Method documentation is in IInsightFacade
  *
  */
+// const datasets = new Map<string, { id: string; kind: InsightDatasetKind }>();
+
 export default class InsightFacade implements IInsightFacade {
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		try {
 			validateDataset(id, kind);
 			const idsList = await getStoredDatasetIds();
 			if (idsList.includes(id)) {
-				throw new InsightError(`Dataset with id ${id} already exists.`);
+				return Promise.reject(new InsightError(`Dataset with id ${id} already exists.`));
 			}
 
 			const fileMap = await parseZipFile(content);
@@ -43,7 +46,7 @@ export default class InsightFacade implements IInsightFacade {
 		try {
 			// Validate dataset ID (no underscores and not empty/whitespace)
 			if (id.trim().length === 0 || id.includes("_")) {
-				throw new InsightError("Invalid ID: ID is empty, only whitespace, or contains an underscore.");
+				return Promise.reject(new InsightError("Invalid ID: ID is empty, only whitespace, or contains an underscore."));
 			}
 
 			// List of stored dataset IDs
@@ -51,7 +54,7 @@ export default class InsightFacade implements IInsightFacade {
 
 			// Check if dataset exists
 			if (!storedDatasetIds.includes(id)) {
-				throw new NotFoundError(`Dataset with id ${id} not found.`);
+				return Promise.reject(new NotFoundError(`Dataset with id ${id} not found.`));
 			}
 
 			// File path for the dataset
@@ -60,7 +63,7 @@ export default class InsightFacade implements IInsightFacade {
 			// Check if the file exists on disk
 			const fileExists = await fs.pathExists(filePath);
 			if (!fileExists) {
-				throw new NotFoundError(`Dataset with id ${id} not found on disk.`);
+				return Promise.reject(new NotFoundError(`Dataset with id ${id} not found on disk.`));
 			}
 
 			// Remove the file from disk
