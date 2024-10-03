@@ -1,29 +1,27 @@
-import { InsightError, InsightResult } from "./IInsightFacade";
-import path from "path";
-import * as fs from "fs-extra";
+import { InsightError } from "./IInsightFacade";
 
 export interface Query extends Object {
 	WHERE: Filter;
 	OPTIONS: Options;
 }
-type Filter = LogicComparison | MComparison | SComparison | Negation | {};
+export type Filter = LogicComparison | MComparison | SComparison | Negation | {};
 
-interface LogicComparison {
+export interface LogicComparison {
 	AND?: Filter[];
 	OR?: Filter[];
 }
-interface MComparison {
+export interface MComparison {
 	EQ?: Record<string, number>;
 	GT?: Record<string, number>;
 	LT?: Record<string, number>;
 }
-interface SComparison {
+export interface SComparison {
 	IS: Record<string, string>;
 }
-interface Negation {
+export interface Negation {
 	NOT: Filter;
 }
-interface Options {
+export interface Options {
 	COLUMNS: string[];
 	ORDER?: string;
 }
@@ -133,7 +131,7 @@ async function validateOptions(options: Options): Promise<boolean> {
 	if (options.COLUMNS.length === 0 || !Array.isArray(options.COLUMNS)) {
 		throw new InsightError("Option COLUMNS not formatted correctly");
 	}
-	// start chatGPT for help iterating with promises and Linting
+	// start chatGPT for help iterating with promises against linter
 	const validationResults = await Promise.all(
 		options.COLUMNS.map(async (key) => {
 			return Promise.any([validateSKey(key), validateMKey(key)]).catch(() => false);
@@ -142,7 +140,7 @@ async function validateOptions(options: Options): Promise<boolean> {
 	// end chatGPT for help iterating with promises
 	for (const result of validationResults) {
 		if (!result) {
-			throw new InsightError("Key not MKey or SKey");
+			throw new InsightError("Key in Options not MKey or SKey");
 		}
 	}
 
@@ -188,32 +186,3 @@ async function validateInputString(string: string): Promise<boolean> {
 	throw new InsightError("InputString not formatted correctly");
 }
 // end adapted from chatGPT
-
-export async function getResults(query: Query): Promise<InsightResult[]> {
-	const dataset = await getDataset(query);
-
-	const result: InsightResult = {
-		id: dataset.sections,
-	};
-
-	return [result];
-}
-
-async function getDataset(query: Query): Promise<any> {
-	try {
-		let getID = "";
-		const keyToParse = query.OPTIONS.COLUMNS[0];
-		let index = 0;
-
-		while (keyToParse[index] !== "_") {
-			getID += keyToParse[index];
-			index++;
-		}
-
-		const id = getID;
-		const filePath = path.join("./data", `${id}.json`);
-		return await fs.readJson(filePath);
-	} catch {
-		throw new InsightError("Referenced dataset ID had not been added yet");
-	}
-}
