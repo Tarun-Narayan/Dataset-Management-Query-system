@@ -83,9 +83,9 @@ export default class InsightFacade implements IInsightFacade {
 				if (valid) {
 					try {
 						result = await getResults(query as Query);
-						return result;
+						return Promise.resolve(result);
 					} catch (err) {
-						return Promise.reject(err as ResultTooLargeError);
+						return Promise.reject(err);
 					}
 				}
 				return Promise.reject(new InsightError("Invalid query syntax"));
