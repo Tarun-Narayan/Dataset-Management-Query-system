@@ -1,17 +1,18 @@
-import { InsightDatasetKind, InsightError, InsightResult } from "./IInsightFacade";
+import { InsightDatasetKind, InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 import path from "path";
 import * as fs from "fs-extra";
 import { Query, LogicComparison, SComparison, MComparison, Negation, Filter } from "./Query";
+import { getResultObject } from "./GetResultObject";
+const MAX_SIZE = 5000;
 
 export async function getResults(query: Query): Promise<InsightResult[]> {
 	const dataset = await getDataset(query);
 	const sections = await getSections(query.WHERE, dataset);
+	if (sections.length >= MAX_SIZE) {
+		throw new ResultTooLargeError(`Query Result size exceeded: ` + `${MAX_SIZE}`);
+	}
 
-	const result: InsightResult = {
-		id: sections[0],
-	};
-
-	return [result];
+	return getResultObject(query.OPTIONS, sections);
 }
 
 async function getDataset(
@@ -32,88 +33,96 @@ async function getSections(
 	filter: Filter,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
-	const sections = [];
+	const sections = new Set<any>();
+	let toAdd: any[] = [];
 
 	if (Object.keys(filter).length === 0) {
 		return dataset.sections;
 	}
 
 	if ("OR" in filter || "AND" in filter) {
-		sections.push(await handleLogicComparison(filter as LogicComparison, dataset));
+		toAdd = await handleLogicComparison(filter as LogicComparison, dataset);
 	}
 
 	if ("GT" in filter || "LT" in filter || "EQ" in filter) {
-		sections.push(await handleMComparison(filter as MComparison, dataset));
+		toAdd = await handleMComparison(filter as MComparison, dataset);
 	}
 
 	if ("IS" in filter) {
-		sections.push(await handleSComparison(filter as SComparison, dataset));
+		toAdd = await handleSComparison(filter as SComparison, dataset);
 	}
 
 	if ("NOT" in filter) {
-		sections.push(await handleNegation(filter as Negation, dataset));
+		toAdd = await handleNegation(filter as Negation, dataset);
+	}
+	for (const section of toAdd) {
+		sections.add(section);
 	}
 
-	return sections;
+	return Array.from(sections);
 }
 
 async function handleLogicComparison(
 	filter: LogicComparison,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
-	const sections = [];
+	const sections = new Set<any>();
 
-	if ((filter as LogicComparison).AND) {
-		sections.push(await handleAnd((filter as LogicComparison).AND, dataset));
+	if (filter.AND) {
+		const toAdd = await handleAnd(filter.AND, dataset);
+		for (const section of toAdd) {
+			sections.add(section);
+		}
 	}
-	if ((filter as LogicComparison).OR) {
-		sections.push(await handleOr((filter as LogicComparison).OR, dataset));
+	if (filter.OR) {
+		const toAdd = await handleOr(filter.OR, dataset);
+		for (const section of toAdd) {
+			sections.add(section);
+		}
 	}
-	return sections;
+	return Array.from(sections);
 }
 
 async function handleOr(
 	filters: Filter[] | undefined,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
-	const sections: any[] = [];
+	const sections = new Set<any>();
 
 	if (filters) {
 		await Promise.all(
 			filters.map(async (filter) => {
 				const toAdd = await getSections(filter, dataset);
 				for (const section of toAdd) {
-					if (!sections.includes(section)) {
-						sections.push(section);
-					}
+					sections.add(section);
 				}
 			})
 		);
 	}
 
-	return sections;
+	return Array.from(sections);
 }
 
 async function handleAnd(
 	filters: Filter[] | undefined,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
-	const sections: any[] = [];
-	const validSections: any[] = [];
+	const sections = new Set<any>();
+	const validSections = new Set<any>();
 
 	if (filters) {
 		await Promise.all(
 			filters.map(async (filter) => {
-				if (validSections.length === 0) {
+				if (validSections.size === 0) {
 					const toAdd = await getSections(filter, dataset);
 					for (const section of toAdd) {
-						validSections.push(section);
+						validSections.add(section);
 					}
 				} else {
 					const toCheck = await getSections(filter, dataset);
 					for (const section of toCheck) {
-						if (validSections.includes(section)) {
-							sections.push(section);
+						if (validSections.has(section)) {
+							sections.add(section);
 						}
 					}
 				}
@@ -121,23 +130,50 @@ async function handleAnd(
 		);
 	}
 
-	return sections;
+	return Array.from(sections);
 }
 
 async function handleMComparison(
 	filter: MComparison,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
-	return [];
+	const sections = new Set<any>();
+	let record: Record<string, number> = { "": 0 };
+	let type = "";
+	if (filter.EQ) {
+		record = filter.EQ;
+		type = "EQ";
+	} else if (filter.LT) {
+		record = filter.LT;
+		type = "LT";
+	} else if (filter.GT) {
+		record = filter.GT;
+		type = "GT";
+	}
+	const [MKey, input] = Object.entries(record)[0];
+	const id = MKey.split("_", 1)[0];
+	const field = MKey.split("_", 1)[1];
+	if (id !== dataset.id) {
+		throw new InsightError("Query references multiple datasets");
+	}
+
+	await Promise.all(
+		dataset.sections.map(async (section) => {
+			if (await checkMSection(section, field, input, type)) {
+				sections.add(section);
+			}
+		})
+	);
+	return Array.from(sections);
 }
 
 async function handleSComparison(
 	filter: SComparison,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
-	const sections: any[] = [];
-	const SKey = Object.keys(filter.IS)[0];
-	const input = Object.values(filter.IS)[0];
+	const sections = new Set<any>();
+	const record = filter.IS;
+	const [SKey, input] = Object.entries(record)[0];
 	const id = SKey.split("_", 1)[0];
 	const field = SKey.split("_", 1)[1];
 	if (id !== dataset.id) {
@@ -145,24 +181,64 @@ async function handleSComparison(
 	}
 
 	await Promise.all(
-		dataset.sections.map(async(section) => {
-			if (await checkSection(section, field, input)) {
-				sections.push(section);
+		dataset.sections.map(async (section) => {
+			if (await checkSSection(section, field, input)) {
+				sections.add(section);
 			}
-		}))
+		})
+	);
 
-	return sections;
+	return Array.from(sections);
 }
 
-async function checkSection(section: any, field: string, input: string | number): Promise<Boolean> {
-	let result: Promise<boolean>
-	if (typeof input === "string") {
-
+async function checkSSection(section: any, field: string, input: string): Promise<Boolean> {
+	let toCompare: string = section.Subject;
+	if (field === "uuid") {
+		toCompare = section.id;
 	}
-	if (typeof input === "number") {
-
+	if (field === "id") {
+		toCompare = section.Course;
 	}
-	return result;
+	if (field === "title") {
+		toCompare = section.Title;
+	}
+	if (field === "instructor") {
+		toCompare = section.Professor;
+	}
+	if (input.startsWith("*") && input.endsWith("*")) {
+		return toCompare.includes(input.slice(1, -1));
+	}
+	if (input.startsWith("*")) {
+		return toCompare.endsWith(input.slice(1));
+	}
+	if (input.endsWith("*")) {
+		return toCompare.startsWith(input.slice(0, -1));
+	}
+	return toCompare === input;
+}
+
+async function checkMSection(section: any, field: string, input: number, type: string): Promise<Boolean> {
+	let toCompare: number = section.Audit;
+	if (field === "avg") {
+		toCompare = section.Avg;
+	}
+	if (field === "year") {
+		toCompare = section.Year;
+	}
+	if (field === "pass") {
+		toCompare = section.Pass;
+	}
+	if (field === "fail") {
+		toCompare = section.Fail;
+	}
+
+	if (type === "GT") {
+		return toCompare > input;
+	}
+	if (type === "EQ") {
+		return toCompare === input;
+	}
+	return toCompare < input;
 }
 
 async function handleNegation(
@@ -170,13 +246,13 @@ async function handleNegation(
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
 	const invalidSections = await getSections(filter.NOT, dataset);
-	const sections = [];
+	const sections = new Set<any>();
 
 	for (const section of dataset.sections) {
 		if (!invalidSections.includes(section)) {
-			sections.push(section);
+			sections.add(section);
 		}
 	}
 
-	return sections;
+	return Array.from(sections);
 }
