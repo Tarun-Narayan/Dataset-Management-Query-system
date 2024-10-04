@@ -35,7 +35,7 @@ describe("InsightFacade", function () {
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
 	});
-	/*
+
 	describe("AddDataset", function () {
 		beforeEach(function () {
 			facade = new InsightFacade();
@@ -186,7 +186,7 @@ describe("InsightFacade", function () {
 			]);
 		});
 	});
-*/
+
 	describe("PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
