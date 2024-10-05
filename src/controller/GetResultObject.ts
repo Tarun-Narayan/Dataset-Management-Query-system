@@ -1,4 +1,4 @@
-import { InsightResult } from "./IInsightFacade";
+import { InsightError, InsightResult } from "./IInsightFacade";
 import { Options } from "./Query";
 
 // Data file to dataset mapping.
@@ -94,6 +94,10 @@ function orderResults(results: InsightResult[], orderKey: string): InsightResult
 export async function getResultObject(options: Options, sections: any[]): Promise<InsightResult[]> {
 	let results: InsightResult[] = [];
 
+	if (!validKeys(options.COLUMNS)) {
+		throw new InsightError("Query references multiple datasets");
+	}
+
 	for (const section of sections) {
 		const mappedResult = mapSectionToResult(section); // Map section keys to result keys
 		const filteredResult = filterResultKeys(mappedResult, options.COLUMNS); // Filter based on COLUMNS
@@ -118,4 +122,17 @@ export async function getResultObject(options: Options, sections: any[]): Promis
 	}
 
 	return results;
+}
+
+function validKeys(keys: string[]): boolean {
+	const keyToParse = keys[0];
+	const validID = keyToParse.split("_")[0];
+
+	for (const key of keys) {
+		const toCompare = key.split("_")[0];
+		if (toCompare !== validID) {
+			return false;
+		}
+	}
+	return true;
 }
