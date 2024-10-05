@@ -8,7 +8,7 @@ const MAX_SIZE = 5000;
 export async function getResults(query: Query): Promise<InsightResult[]> {
 	const dataset = await getDataset(query);
 	const sections = await getSections(query.WHERE, dataset);
-	if (sections.length >= MAX_SIZE) {
+	if (sections.length > MAX_SIZE) {
 		throw new ResultTooLargeError(`Query Result size exceeded: ` + `${MAX_SIZE}`);
 	}
 
