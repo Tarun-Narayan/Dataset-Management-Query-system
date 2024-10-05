@@ -67,9 +67,32 @@ function filterResultKeys(resultEntry: any, columns: string[]): any {
 	return filteredEntry;
 }
 
+// Order results based on the specified key
+function orderResults(results: InsightResult[], orderKey: string): InsightResult[] {
+	return results.sort((a, b) => {
+		const aValue = a[orderKey];
+		const bValue = b[orderKey];
+		// Check if both values are numbers
+		if (typeof aValue === "number" && typeof bValue === "number") {
+			return aValue - bValue;
+		} else {
+			// String comparison
+			const aString = String(aValue);
+			const bString = String(bValue);
+			if (aString < bString) {
+				return -1; //Ascending
+			}
+			if (aString > bString) {
+				return 1; //Descending
+			}
+			return 0;
+		}
+	});
+}
+
 // Get the result object
 export async function getResultObject(options: Options, sections: any[]): Promise<InsightResult[]> {
-	const results: InsightResult[] = [];
+	let results: InsightResult[] = [];
 
 	for (const section of sections) {
 		const mappedResult = mapSectionToResult(section); // Map section keys to result keys
@@ -86,6 +109,12 @@ export async function getResultObject(options: Options, sections: any[]): Promis
 		}
 
 		results.push(finalEntry); // Add the final entry to results
+	}
+
+	// Order the results based on options.ORDER (string column name)
+	if (options.ORDER) {
+		const orderKey = options.ORDER; // The column name to order by
+		results = orderResults(results, orderKey); // Use the helper function to order results
 	}
 
 	return results;
