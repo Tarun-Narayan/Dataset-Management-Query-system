@@ -185,4 +185,3 @@ async function validateInputString(string: string): Promise<boolean> {
 	}
 	throw new InsightError("InputString not formatted correctly");
 }
-

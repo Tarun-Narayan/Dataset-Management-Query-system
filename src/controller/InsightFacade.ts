@@ -4,7 +4,6 @@ import {
 	InsightDatasetKind,
 	InsightResult,
 	InsightError,
-	ResultTooLargeError,
 	NotFoundError,
 } from "./IInsightFacade";
 import { validateDataset, parseZipFile, processSections, saveDataset, getStoredDatasetIds } from "./ZipDecoder";
