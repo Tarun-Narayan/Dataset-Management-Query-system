@@ -12,6 +12,7 @@ import { clearDisk, getContentFromArchives, loadTestQuery } from "../TestUtil";
 import { expect, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import Assertion = Chai.Assertion;
+import { Query } from "../../src/controller/Query";
 
 use(chaiAsPromised);
 
@@ -210,7 +211,11 @@ describe("InsightFacade", function () {
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
-				return expect(result).to.deep.equal(expected);
+				if ((input as Query).OPTIONS.ORDER) {
+					return expect(result).to.have.ordered.members(expected);
+				} else {
+					return expect(result).to.have.deep.members(expected);
+				}
 			} catch (err) {
 				if (!errorExpected) {
 					expect.fail(`performQuery threw unexpected error: ${err}`);
