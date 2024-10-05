@@ -15,6 +15,7 @@ const mapping: Record<string, string> = {
 	Audit: "audit",
 };
 
+
 // Map section keys to result keys
 function mapSectionToResult(section: any): any {
 	const resultEntry: any = {};
@@ -45,6 +46,7 @@ function mapSectionToResult(section: any): any {
 	return resultEntry;
 }
 
+
 // Filter out keys not in COLUMNS
 function filterResultKeys(resultEntry: any, columns: string[]): any {
 	const filteredEntry: any = {};
@@ -66,6 +68,7 @@ function filterResultKeys(resultEntry: any, columns: string[]): any {
 	}
 	return filteredEntry;
 }
+
 
 // Order results based on the specified key
 function orderResults(results: InsightResult[], orderKey: string): InsightResult[] {
@@ -93,10 +96,6 @@ function orderResults(results: InsightResult[], orderKey: string): InsightResult
 // Get the result object
 export async function getResultObject(options: Options, sections: any[]): Promise<InsightResult[]> {
 	let results: InsightResult[] = [];
-
-	if (!validKeys(options.COLUMNS)) {
-		throw new InsightError("Query references multiple datasets");
-	}
 
 	for (const section of sections) {
 		const mappedResult = mapSectionToResult(section); // Map section keys to result keys
@@ -135,4 +134,3 @@ function validKeys(keys: string[]): boolean {
 		}
 	}
 	return true;
-}
