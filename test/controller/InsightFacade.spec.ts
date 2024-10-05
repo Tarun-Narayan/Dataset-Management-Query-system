@@ -208,8 +208,8 @@ describe("InsightFacade", function () {
 			try {
 				result = await facade.performQuery(input);
 				// const number = 2;
-
-				// Log actual and expected results for comparison
+				//
+				// // Log actual and expected results for comparison
 				// console.log("Actual result: ", JSON.stringify(result, null, number));
 				// console.log("Expected result: ", JSON.stringify(expected, null, number));
 				if (errorExpected) {
