@@ -108,28 +108,23 @@ async function handleAnd(
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
 	const sections = new Set<any>();
-	const validSections = new Set<any>();
 
 	if (filters) {
-		await Promise.all(
-			filters.map(async (filter) => {
-				if (validSections.size === 0) {
-					const toAdd = await getSections(filter, dataset);
-					for (const section of toAdd) {
-						validSections.add(section);
-					}
-				} else {
-					const toCheck = await getSections(filter, dataset);
-					for (const section of toCheck) {
-						if (validSections.has(section)) {
-							sections.add(section);
+		await getSections(filters[0], dataset).then(async (validSections) => {
+			await Promise.all(
+				filters.map(async (filter) => {
+					if (filter !== filters[0]) {
+						const toCheck = await getSections(filter, dataset);
+						for (const section of toCheck) {
+							if (validSections.includes(section)) {
+								sections.add(section);
+							}
 						}
 					}
-				}
-			})
-		);
+				})
+			);
+		});
 	}
-
 	return Array.from(sections);
 }
 
@@ -151,8 +146,8 @@ async function handleMComparison(
 		type = "GT";
 	}
 	const [MKey, input] = Object.entries(record)[0];
-	const id = MKey.split("_", 1)[0];
-	const field = MKey.split("_", 1)[1];
+	const id = MKey.split("_")[0];
+	const field = MKey.split("_")[1];
 	if (id !== dataset.id) {
 		throw new InsightError("Query references multiple datasets");
 	}
@@ -164,6 +159,7 @@ async function handleMComparison(
 			}
 		})
 	);
+
 	return Array.from(sections);
 }
 
@@ -174,8 +170,8 @@ async function handleSComparison(
 	const sections = new Set<any>();
 	const record = filter.IS;
 	const [SKey, input] = Object.entries(record)[0];
-	const id = SKey.split("_", 1)[0];
-	const field = SKey.split("_", 1)[1];
+	const id = SKey.split("_")[0];
+	const field = SKey.split("_")[1];
 	if (id !== dataset.id) {
 		throw new InsightError("Query references multiple datasets");
 	}
@@ -205,6 +201,7 @@ async function checkSSection(section: any, field: string, input: string): Promis
 	if (field === "instructor") {
 		toCompare = section.Professor;
 	}
+
 	if (input.startsWith("*") && input.endsWith("*")) {
 		return toCompare.includes(input.slice(1, -1));
 	}
@@ -245,14 +242,14 @@ async function handleNegation(
 	filter: Negation,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
 ): Promise<any[]> {
-	const invalidSections = await getSections(filter.NOT, dataset);
 	const sections = new Set<any>();
-
-	for (const section of dataset.sections) {
-		if (!invalidSections.includes(section)) {
-			sections.add(section);
+	await getSections(filter.NOT, dataset).then((invalidSections) => {
+		for (const section of dataset.sections) {
+			if (!invalidSections.includes(section)) {
+				sections.add(section);
+			}
 		}
-	}
+	});
 
 	return Array.from(sections);
 }
