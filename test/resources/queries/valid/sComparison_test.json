@@ -1,0 +1,20 @@
+{
+	"title": "SELECT sections WHERE instructor contains 'pres'",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"sections_instructor": "*pres*"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_instructor",
+				"sections_avg"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{"sections_instructor":"ansermino, john mark;barr, alasdair;bernatchez, pascal;bhagavatula, sastry;choi, peter tsz lung;etminan, mahyar;griesdale, donald e;hackett, tillie-louise;horne, andrew;laher, ismail;preston, roanne;schwarz, stephan;warriner, charles brian;wright, james","sections_avg":83.85},{"sections_instructor":"ansermino, john mark;barr, alasdair;bernatchez, pascal;bhagavatula, sastry;choi, peter tsz lung;etminan, mahyar;fedida, david;griesdale, donald e;hackett, tillie-louise;horne, andrew;kurata, harley;laher, ismail;preston, roanne;schwarz, stephan;walker, michael j a;warriner, charles brian;wright, james","sections_avg":82.76},{"sections_instructor":"preston, evan keith","sections_avg":72.63},{"sections_instructor":"preston, evan keith","sections_avg":71.53},{"sections_instructor":"preston, evan keith","sections_avg":71.15},{"sections_instructor":"prescott, cindy","sections_avg":84.08}
+	]
+}
