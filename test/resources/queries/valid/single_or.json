@@ -1,0 +1,29 @@
+{
+	"title": "Query using OR logic with one filter",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"LT": {
+						"sections_avg": 5
+					}
+				}
+
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_avg"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{"sections_avg":4},
+		{"sections_avg":4},
+		{"sections_avg":4.5},
+		{"sections_avg":0},
+		{"sections_avg":0},
+		{"sections_avg":0},
+		{"sections_avg":1}]
+}

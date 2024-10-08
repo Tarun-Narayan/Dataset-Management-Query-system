@@ -110,6 +110,9 @@ async function handleAnd(
 	const sections = new Set<any>();
 
 	if (filters) {
+		if (filters.length === 1) {
+			return await getSections(filters[0], dataset);
+		}
 		await getSections(filters[0], dataset).then(async (validSections) => {
 			await Promise.all(
 				filters.map(async (filter) => {
