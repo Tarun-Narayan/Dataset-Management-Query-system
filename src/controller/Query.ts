@@ -69,7 +69,11 @@ async function validateLogicComparison(filter: LogicComparison): Promise<boolean
 				notEmpty = false;
 			}
 		}
-		return Array.isArray(filter.AND) && filter.AND.length > 0 && filter.AND.every(validateBody) && notEmpty;
+		const validResults = await Promise.all(filter.AND.map(validateBody));
+		if (!(Array.isArray(filter.AND) && filter.AND.length > 0 && validResults.every(Boolean) && notEmpty)) {
+			throw new InsightError("LogicComparison not formatted correctly");
+		}
+		return true;
 	}
 	if (filter.OR) {
 		for (const fil of filter.OR) {
@@ -77,57 +81,67 @@ async function validateLogicComparison(filter: LogicComparison): Promise<boolean
 				notEmpty = false;
 			}
 		}
-		return Array.isArray(filter.OR) && filter.OR.length > 0 && filter.OR.every(validateBody) && notEmpty;
+		const validResults = await Promise.all(filter.OR.map(validateBody));
+		if (!(Array.isArray(filter.OR) && filter.OR.length > 0 && validResults.every(Boolean) && notEmpty)) {
+			throw new InsightError("LogicComparison not formatted correctly");
+		}
+		return true;
 	}
 
 	throw new InsightError("LogicComparison not formatted correctly");
 }
 
 async function validateMComparison(filter: MComparison): Promise<boolean> {
-	if (filter.EQ) {
-		return (
-			Object.keys(filter.EQ).length === 1 &&
-			(await validateMKey(Object.keys(filter.EQ)[0])) &&
-			typeof Object.values(filter.EQ)[0] === "number"
-		);
-	}
-	if (filter.LT) {
-		return (
-			Object.keys(filter.LT).length === 1 &&
-			(await validateMKey(Object.keys(filter.LT)[0])) &&
-			typeof Object.values(filter.LT)[0] === "number"
-		);
-	}
-	if (filter.GT) {
-		return (
-			Object.keys(filter.GT).length === 1 &&
-			(await validateMKey(Object.keys(filter.GT)[0])) &&
-			typeof Object.values(filter.GT)[0] === "number"
-		);
+	const key = Object.keys(filter)[0];
+	if (key === "EQ" || key === "LT" || key === "GT") {
+		const record = filter[key];
+		if (record) {
+			if (
+				!(
+					Object.keys(record).length === 1 &&
+					(await validateMKey(Object.keys(record)[0])) &&
+					typeof Object.values(record)[0] === "number"
+				)
+			) {
+				throw new InsightError("MComparison not formatted correctly");
+			}
+			return true;
+		}
 	}
 
 	throw new InsightError("MComparison not formatted correctly");
 }
 async function validateSComparison(filter: SComparison): Promise<boolean> {
 	if (filter.IS) {
-		return (
-			Object.keys(filter.IS).length === 1 &&
-			(await validateSKey(Object.keys(filter.IS)[0])) &&
-			typeof Object.values(filter.IS)[0] === "string" &&
-			validateInputString(Object.values(filter.IS)[0])
-		);
+		if (
+			!(
+				Object.keys(filter.IS).length === 1 &&
+				(await validateSKey(Object.keys(filter.IS)[0])) &&
+				typeof Object.values(filter.IS)[0] === "string" &&
+				(await validateInputString(Object.values(filter.IS)[0]))
+			)
+		) {
+			throw new InsightError("SComparison not formatted correctly");
+		}
+		return true;
 	}
 	throw new InsightError("SComparison not formatted correctly");
 }
 
 async function validateNegation(filter: Negation): Promise<boolean> {
 	if (filter.NOT) {
-		return validateBody(filter.NOT);
+		if (!((await validateBody(filter.NOT)) && Object.keys(filter.NOT).length !== 0)) {
+			throw new InsightError("Negation not formatted correctly");
+		}
+		return true;
 	}
 	throw new InsightError("Negation not formatted correctly");
 }
 
 async function validateOptions(options: Options): Promise<boolean> {
+	if (Object.keys(options).length === 0) {
+		throw new InsightError("Options not formatted correctly");
+	}
 	if (options.COLUMNS.length === 0 || !Array.isArray(options.COLUMNS)) {
 		throw new InsightError("Option COLUMNS not formatted correctly");
 	}
@@ -151,10 +165,9 @@ async function validateOptions(options: Options): Promise<boolean> {
 				validOrder = true;
 			}
 		}
-		if (validOrder) {
-			return true;
+		if (!validOrder) {
+			throw new InsightError("Order key not in COLUMNS");
 		}
-		throw new InsightError("Order key not in COLUMNS");
 	}
 	return true;
 }
