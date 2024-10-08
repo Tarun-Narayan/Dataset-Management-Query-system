@@ -270,11 +270,8 @@ describe("InsightFacade", function () {
 		it("[valid/empty_input.json] Test empty input to query", checkQuery);
 		it("[valid/empty_result.json] Test empty result to query", checkQuery);
 
-
 		it("[valid/single_and.json] Query using AND logic with one filter", checkQuery);
 		it("[valid/single_or.json] Query using OR logic with one filter", checkQuery);
-
-
 
 		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
 		it("[invalid/asterisk_middle.json] Query has asterisk in invalid spot", checkQuery);
