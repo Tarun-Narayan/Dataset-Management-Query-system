@@ -265,8 +265,10 @@ describe("InsightFacade", function () {
 		it("[valid/or.json] Query using or logic", checkQuery);
 		it("[valid/equal.json] Query using equal comparator", checkQuery);
 		it("[valid/complex.json] Very complex valid query", checkQuery);
+
 		it("[valid/single_and.json] Query using AND logic with one filter", checkQuery);
 		it("[valid/single_or.json] Query using OR logic with one filter", checkQuery);
+
 
 		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
 		it("[invalid/asterisk_middle.json] Query has asterisk in invalid spot", checkQuery);
