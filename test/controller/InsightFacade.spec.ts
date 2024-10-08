@@ -208,11 +208,11 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
-				const number = 2;
-
-				// Log actual and expected results for comparison
-				console.log("Actual result: ", JSON.stringify(result, null, number));
-				console.log("Expected result: ", JSON.stringify(expected, null, number));
+				// const number = 2;
+				//
+				// // Log actual and expected results for comparison
+				// console.log("Actual result: ", JSON.stringify(result, null, number));
+				// console.log("Expected result: ", JSON.stringify(expected, null, number));
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
