@@ -208,11 +208,11 @@ describe("InsightFacade", function () {
 			let result: InsightResult[];
 			try {
 				result = await facade.performQuery(input);
-				// const number = 2;
-				//
-				// // Log actual and expected results for comparison
-				// console.log("Actual result: ", JSON.stringify(result, null, number));
-				// console.log("Expected result: ", JSON.stringify(expected, null, number));
+				const number = 2;
+
+				// Log actual and expected results for comparison
+				console.log("Actual result: ", JSON.stringify(result, null, number));
+				console.log("Expected result: ", JSON.stringify(expected, null, number));
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
@@ -266,6 +266,8 @@ describe("InsightFacade", function () {
 		it("[valid/equal.json] Query using equal comparator", checkQuery);
 		it("[valid/complex.json] Very complex valid query", checkQuery);
 		it("[valid/sComparison_test.json] SELECT sections WHERE instructor contains 'pres'", checkQuery);
+		it("[valid/empty_input.json] Test empty input to query", checkQuery);
+		it("[valid/empty_result.json] Test empty result to query", checkQuery);
 
 		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
 		it("[invalid/asterisk_middle.json] Query has asterisk in invalid spot", checkQuery);
