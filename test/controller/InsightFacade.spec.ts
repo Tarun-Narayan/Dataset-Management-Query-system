@@ -282,8 +282,8 @@ describe("InsightFacade", function () {
 		it("[invalid/invalid_key.json] Query key cannot be empty string", checkQuery);
 		it("[invalid/invalid_key2.json] Query key is invalid", checkQuery);
 		it("[invalid/missing_options.json] Query missing options", checkQuery);
-		it("[invalid/missing_options.json] Query missing columns", checkQuery);
-		it("[invalid/missing_options.json] Query missing keylist", checkQuery);
+		it("[invalid/missing_columns.json] Query missing columns", checkQuery);
+		it("[invalid/missing_keylist.json] Query missing keylist", checkQuery);
 		it("[invalid/invalid_comparator.json] Query comparator needs to be number", checkQuery);
 		it("[invalid/invalid_logic.json] Query logic is not valid", checkQuery);
 		it("[invalid/no_match.json] Dataset has not been added yet", checkQuery);
