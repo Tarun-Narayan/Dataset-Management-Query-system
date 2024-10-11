@@ -92,48 +92,45 @@ async function validateLogicComparison(filter: LogicComparison): Promise<boolean
 }
 
 async function validateMComparison(filter: MComparison): Promise<boolean> {
-	const key = Object.keys(filter)[0];
-	if (key === "EQ" || key === "LT" || key === "GT") {
-		const record = filter[key];
-		if (record) {
-			if (
-				!(
-					Object.keys(record).length === 1 &&
-					(await validateMKey(Object.keys(record)[0])) &&
-					typeof Object.values(record)[0] === "number"
-				)
-			) {
-				throw new InsightError("MComparison not formatted correctly");
-			}
-			return true;
-		}
+	if (filter.EQ) {
+		return (
+			Object.keys(filter.EQ).length === 1 &&
+			(await validateMKey(Object.keys(filter.EQ)[0])) &&
+			typeof Object.values(filter.EQ)[0] === "number"
+		);
+	}
+	if (filter.LT) {
+		return (
+			Object.keys(filter.LT).length === 1 &&
+			(await validateMKey(Object.keys(filter.LT)[0])) &&
+			typeof Object.values(filter.LT)[0] === "number"
+		);
+	}
+	if (filter.GT) {
+		return (
+			Object.keys(filter.GT).length === 1 &&
+			(await validateMKey(Object.keys(filter.GT)[0])) &&
+			typeof Object.values(filter.GT)[0] === "number"
+		);
 	}
 
 	throw new InsightError("MComparison not formatted correctly");
 }
 async function validateSComparison(filter: SComparison): Promise<boolean> {
 	if (filter.IS) {
-		if (
-			!(
-				Object.keys(filter.IS).length === 1 &&
-				(await validateSKey(Object.keys(filter.IS)[0])) &&
-				typeof Object.values(filter.IS)[0] === "string" &&
-				(await validateInputString(Object.values(filter.IS)[0]))
-			)
-		) {
-			throw new InsightError("SComparison not formatted correctly");
-		}
-		return true;
+		return (
+			Object.keys(filter.IS).length === 1 &&
+			(await validateSKey(Object.keys(filter.IS)[0])) &&
+			typeof Object.values(filter.IS)[0] === "string" &&
+			(await validateInputString(Object.values(filter.IS)[0]))
+		);
 	}
 	throw new InsightError("SComparison not formatted correctly");
 }
 
 async function validateNegation(filter: Negation): Promise<boolean> {
 	if (filter.NOT) {
-		if (!((await validateBody(filter.NOT)) && Object.keys(filter.NOT).length !== 0)) {
-			throw new InsightError("Negation not formatted correctly");
-		}
-		return true;
+		return await validateBody(filter.NOT);
 	}
 	throw new InsightError("Negation not formatted correctly");
 }
