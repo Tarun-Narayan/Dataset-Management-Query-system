@@ -158,15 +158,9 @@ async function validateOptions(options: Options): Promise<boolean> {
 		}
 	}
 
-	if (options.ORDER) {
-		let validOrder = false;
-		for (const key of options.COLUMNS) {
-			if (key === options.ORDER) {
-				validOrder = true;
-			}
-		}
-		if (!validOrder) {
-			throw new InsightError("Order key not in COLUMNS");
+	if (typeof options.ORDER === "string") {
+		if (!options.COLUMNS.includes(options.ORDER)) {
+			throw new InsightError("Order key must be in COLUMNS");
 		}
 	}
 	return true;
