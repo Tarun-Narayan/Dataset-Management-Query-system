@@ -62,27 +62,30 @@ async function validateBody(filter: object): Promise<boolean> {
 }
 
 async function validateLogicComparison(filter: LogicComparison): Promise<boolean> {
+	if (Object.keys(filter).length !== 1) {
+		throw new InsightError("MComparison not formatted correctly");
+	}
 	let notEmpty = true;
-	if (filter.AND) {
+	if (filter.AND && Array.isArray(filter.AND)) {
 		for (const fil of filter.AND) {
 			if (Object.keys(fil).length === 0) {
 				notEmpty = false;
 			}
 		}
 		const validResults = await Promise.all(filter.AND.map(validateBody));
-		if (!(Array.isArray(filter.AND) && filter.AND.length > 0 && validResults.every(Boolean) && notEmpty)) {
+		if (!(filter.AND.length > 0 && validResults.every(Boolean) && notEmpty)) {
 			throw new InsightError("LogicComparison not formatted correctly");
 		}
 		return true;
 	}
-	if (filter.OR) {
+	if (filter.OR && Array.isArray(filter.OR)) {
 		for (const fil of filter.OR) {
 			if (Object.keys(fil).length === 0) {
 				notEmpty = false;
 			}
 		}
 		const validResults = await Promise.all(filter.OR.map(validateBody));
-		if (!(Array.isArray(filter.OR) && filter.OR.length > 0 && validResults.every(Boolean) && notEmpty)) {
+		if (!(filter.OR.length > 0 && validResults.every(Boolean) && notEmpty)) {
 			throw new InsightError("LogicComparison not formatted correctly");
 		}
 		return true;
@@ -92,6 +95,9 @@ async function validateLogicComparison(filter: LogicComparison): Promise<boolean
 }
 
 async function validateMComparison(filter: MComparison): Promise<boolean> {
+	if (Object.keys(filter).length !== 1) {
+		throw new InsightError("MComparison not formatted correctly");
+	}
 	if (filter.EQ) {
 		return (
 			Object.keys(filter.EQ).length === 1 &&
@@ -117,7 +123,7 @@ async function validateMComparison(filter: MComparison): Promise<boolean> {
 	throw new InsightError("MComparison not formatted correctly");
 }
 async function validateSComparison(filter: SComparison): Promise<boolean> {
-	if (filter.IS) {
+	if (Object.keys(filter).length === 1 && filter.IS) {
 		return (
 			Object.keys(filter.IS).length === 1 &&
 			(await validateSKey(Object.keys(filter.IS)[0])) &&
@@ -129,7 +135,7 @@ async function validateSComparison(filter: SComparison): Promise<boolean> {
 }
 
 async function validateNegation(filter: Negation): Promise<boolean> {
-	if (filter.NOT) {
+	if (Object.keys(filter).length === 1 && filter.NOT && Object.keys(filter.NOT).length !== 0) {
 		return await validateBody(filter.NOT);
 	}
 	throw new InsightError("Negation not formatted correctly");
