@@ -8,11 +8,11 @@ const MAX_SIZE = 5000;
 export async function getResults(query: Query): Promise<InsightResult[]> {
 	const dataset = await getDataset(query);
 	const sections = await getSections(query.WHERE, dataset);
-	if (sections.length > MAX_SIZE) {
+	if (sections.size > MAX_SIZE) {
 		throw new ResultTooLargeError(`Query Result size exceeded: ` + `${MAX_SIZE}`);
 	}
 
-	return getResultObject(query.OPTIONS, sections);
+	return getResultObject(query.OPTIONS, Array.from(sections));
 }
 
 async function getDataset(
@@ -32,12 +32,14 @@ async function getDataset(
 async function getSections(
 	filter: Filter,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
-): Promise<any[]> {
+): Promise<Set<any>> {
 	const sections = new Set<any>();
 	let toAdd: any[] = [];
 
 	if (Object.keys(filter).length === 0) {
-		return dataset.sections;
+		for (const section of dataset.sections) {
+			sections.add(section);
+		}
 	}
 
 	if ("OR" in filter || "AND" in filter) {
@@ -59,7 +61,7 @@ async function getSections(
 		sections.add(section);
 	}
 
-	return Array.from(sections);
+	return sections;
 }
 
 async function handleLogicComparison(
@@ -111,7 +113,7 @@ async function handleAnd(
 
 	if (filters) {
 		if (filters.length === 1) {
-			return await getSections(filters[0], dataset);
+			return Array.from(await getSections(filters[0], dataset));
 		}
 		await getSections(filters[0], dataset).then(async (validSections) => {
 			await Promise.all(
@@ -119,7 +121,7 @@ async function handleAnd(
 					if (filter !== filters[0]) {
 						const toCheck = await getSections(filter, dataset);
 						for (const section of toCheck) {
-							if (validSections.includes(section)) {
+							if (validSections.has(section)) {
 								sections.add(section);
 							}
 						}
@@ -248,7 +250,7 @@ async function handleNegation(
 	const sections = new Set<any>();
 	await getSections(filter.NOT, dataset).then((invalidSections) => {
 		for (const section of dataset.sections) {
-			if (!invalidSections.includes(section)) {
+			if (!invalidSections.has(section)) {
 				sections.add(section);
 			}
 		}
