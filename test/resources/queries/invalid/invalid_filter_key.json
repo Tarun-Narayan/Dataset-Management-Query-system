@@ -1,0 +1,19 @@
+{
+	"title": "Query with wrong operator in WHERE clause",
+	"input": {
+		"WHERE": {
+			"XYZ": {
+				"courses_avg": 85
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"courses_dept",
+				"courses_avg"
+			],
+			"ORDER": "courses_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}
