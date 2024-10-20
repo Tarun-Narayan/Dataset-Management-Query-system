@@ -47,7 +47,7 @@ export async function parseZipFile(content: string): Promise<Map<string, any>> {
 						const jsonContent = JSON.parse(fileContent);
 						fileMap.set(fileName, jsonContent);
 					} catch (_err) {
-						throw new InsightError(`Invalid file type within courses directory`);
+						//Do nothing
 					}
 				}
 			}
