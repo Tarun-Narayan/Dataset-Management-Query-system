@@ -55,7 +55,7 @@ async function parseRoomDataFromHtml(htmlContent: string, building: any): Promis
 	const roomTableNode = findElementByClassName(document, "views-table cols-5 table");
 
 	if (roomTableNode) {
-		const tbodyNode = roomTableNode.childNodes.find((node: Node) => node.nodeName === "tbody");
+		const tbodyNode = roomTableNode.childNodes.find((node: any) => node.nodeName === "tbody");
 		if (tbodyNode) {
 			for (const row of tbodyNode.childNodes) {
 				if (row.nodeName === "tr") {
@@ -139,7 +139,7 @@ async function extractRoomData(row: any, building: any): Promise<any | null> {
 
 // Extract Room number from <a> tag
 function extractRoomNumber(roomNumberNode: any): string | null {
-	const anchorNode = roomNumberNode?.childNodes.find((child: Node) => child.nodeName === "a");
+	const anchorNode = roomNumberNode?.childNodes.find((child: any) => child.nodeName === "a");
 	return anchorNode?.childNodes[0]?.value.trim() || null;
 }
 
@@ -170,17 +170,17 @@ function getTableNode(document: any): any | null {
 
 // Extract the building link (detailsLink)
 function extractDetailsLink(buildingNameNode: any): string | null {
-	const anchorNode = buildingNameNode?.childNodes.find((child: Node) => child.nodeName === "a");
+	const anchorNode = buildingNameNode?.childNodes.find((child: any) => child.nodeName === "a");
 	return anchorNode?.attrs?.find((attr: any) => attr.name === "href")?.value || null;
 }
 // Extract the More Info link
 function extractMoreInfoLink(RoomInfoNode: any): string | null {
-	const anchorNode = RoomInfoNode?.childNodes.find((child: Node) => child.nodeName === "a");
+	const anchorNode = RoomInfoNode?.childNodes.find((child: any) => child.nodeName === "a");
 	return anchorNode?.attrs?.find((attr: any) => attr.name === "href")?.value || null;
 }
 // Extract Building Name from <a> tag
 function extractBuildingName(buildingNameNode: any): string | null {
-	const anchorNode = buildingNameNode?.childNodes.find((child: Node) => child.nodeName === "a");
+	const anchorNode = buildingNameNode?.childNodes.find((child: any) => child.nodeName === "a");
 	return anchorNode?.childNodes[0]?.value.trim() || null;
 }
 
@@ -214,7 +214,7 @@ export function parseBuildingDataFromHtml(htmlContent: string): any[] {
 	const tableNode = getTableNode(document);
 
 	if (tableNode) {
-		const tbodyNode = tableNode.childNodes.find((node: Node) => node.nodeName === "tbody");
+		const tbodyNode = tableNode.childNodes.find((node: any) => node.nodeName === "tbody");
 		if (tbodyNode) {
 			tbodyNode.childNodes.forEach((row: any) => {
 				if (row.nodeName === "tr") {
