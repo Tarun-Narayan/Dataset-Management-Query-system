@@ -97,7 +97,7 @@ async function fetchGeolocation(address: string): Promise<{ lat?: number; lon?: 
 }
 
 // Extract relevant room data for each room
-async function extractRoomData(row: Node, building: any): Promise<any | null> {
+async function extractRoomData(row: any, building: any): Promise<any | null> {
 	const roomNumberNode = findElementByClassName(row, "views-field-field-room-number");
 	const capacityNode = findElementByClassName(row, "views-field-field-room-capacity");
 	const furnitureTypeNode = findElementByClassName(row, "views-field-field-room-furniture");
@@ -185,7 +185,7 @@ function extractBuildingName(buildingNameNode: any): string | null {
 }
 
 // Extract relevant building data for each building
-function extractBuildingData(row: Node): any | null {
+function extractBuildingData(row: any): any | null {
 	const buildingCodeNode = findElementByClassName(row, "views-field-field-building-code");
 	const buildingNameNode = findElementByClassName(row, "views-field-title");
 	const buildingAddressNode = findElementByClassName(row, "views-field-field-building-address");
@@ -216,7 +216,7 @@ export function parseBuildingDataFromHtml(htmlContent: string): any[] {
 	if (tableNode) {
 		const tbodyNode = tableNode.childNodes.find((node: Node) => node.nodeName === "tbody");
 		if (tbodyNode) {
-			tbodyNode.childNodes.forEach((row: Node) => {
+			tbodyNode.childNodes.forEach((row: any) => {
 				if (row.nodeName === "tr") {
 					const buildingData = extractBuildingData(row);
 					if (buildingData) {
