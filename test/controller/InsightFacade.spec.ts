@@ -12,7 +12,6 @@ import { clearDisk, getContentFromArchives, loadTestQuery } from "../TestUtil";
 import { expect, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
 import Assertion = Chai.Assertion;
-import { Query } from "../../src/controller/Query";
 
 use(chaiAsPromised);
 
@@ -28,10 +27,12 @@ describe("InsightFacade", function () {
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
+	let rooms: string;
 
 	before(async function () {
 		// This block runs once and loads the datasets.
 		sections = await getContentFromArchives("pair.zip");
+		rooms = await getContentFromArchives("campus.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
@@ -44,11 +45,20 @@ describe("InsightFacade", function () {
 		afterEach(async function () {
 			await clearDisk();
 		});
+		it("rooms should reject with an empty dataset id", function () {
+			const result = facade.addDataset("", rooms, InsightDatasetKind.Rooms);
+			return expect(result).to.eventually.be.rejectedWith(InsightError);
+		});
+		it("rooms should add a valid dataset successfully.", async function () {
+			const result = await facade.addDataset("ubc", rooms, InsightDatasetKind.Rooms);
+			expect(result).to.have.members(["ubc"]);
+		});
 
 		it("should reject with an empty dataset id", function () {
 			const result = facade.addDataset("", sections, InsightDatasetKind.Sections);
 			return expect(result).to.eventually.be.rejectedWith(InsightError);
 		});
+
 		it("should reject with an id that is only whitespace", function () {
 			const result = facade.addDataset(" ", sections, InsightDatasetKind.Sections);
 			return expect(result).to.eventually.be.rejectedWith(InsightError);
@@ -216,11 +226,7 @@ describe("InsightFacade", function () {
 				if (errorExpected) {
 					expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 				}
-				if ((input as Query).OPTIONS.ORDER) {
-					return expect(result).to.deep.equal(expected);
-				} else {
-					return expect(result).to.have.deep.members(expected);
-				}
+				return expect(result).to.deep.equal(expected);
 			} catch (err) {
 				if (!errorExpected) {
 					expect.fail(`performQuery threw unexpected error: ${err}`);
