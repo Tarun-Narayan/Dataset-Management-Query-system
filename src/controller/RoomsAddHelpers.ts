@@ -3,9 +3,16 @@ import { InsightError } from "./IInsightFacade";
 import * as parse5 from "parse5";
 import http from "http";
 
+// Function to get the root folder name from the zip file
+function getRootFolderName(zipContent: JSZip): string {
+	const firstFileName = Object.keys(zipContent.files)[0];
+	return firstFileName.split("/")[0];
+}
+
 // Function to parse rooms dataset
 export async function parseRoomsZipFile(zipContent: JSZip): Promise<Map<string, any>> {
 	const fileMap = new Map<string, any>();
+	const rootFolder = getRootFolderName(zipContent);
 	const indexFile = zipContent.files["campus/index.htm"];
 
 	if (!zipContent.files["campus/index.htm"]) {
@@ -23,7 +30,7 @@ export async function parseRoomsZipFile(zipContent: JSZip): Promise<Map<string, 
 		if (building.detailsLink) {
 			const two = 2;
 			//Accessing the building files
-			const res = `campus/${building.detailsLink.substring(two).trim()}`;
+			const res = `${rootFolder}/${building.detailsLink.substring(two).trim()}`;
 			const buildingFile = zipContent.files[res];
 
 			if (buildingFile) {
