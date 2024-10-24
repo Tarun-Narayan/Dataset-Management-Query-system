@@ -45,11 +45,11 @@ describe("InsightFacade", function () {
 		afterEach(async function () {
 			await clearDisk();
 		});
-		it("should reject with an empty dataset id", function () {
+		it("rooms should reject with an empty dataset id", function () {
 			const result = facade.addDataset("", rooms, InsightDatasetKind.Rooms);
 			return expect(result).to.eventually.be.rejectedWith(InsightError);
 		});
-		it("should add a valid dataset successfully.", async function () {
+		it("rooms should add a valid dataset successfully.", async function () {
 			const result = await facade.addDataset("ubc", rooms, InsightDatasetKind.Rooms);
 			expect(result).to.have.members(["ubc"]);
 		});
