@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import {InsightError} from "./IInsightFacade";
+import { InsightError } from "./IInsightFacade";
 import * as parse5 from "parse5";
 import http from "http";
 
@@ -18,7 +18,6 @@ export async function parseRoomsZipFile(zipContent: JSZip): Promise<Map<string, 
 	if (buildings.length === 0) {
 		throw new InsightError("No valid buildings found in index.htm!");
 	}
-
 
 	const promises: Promise<void>[] = buildings.map(async (building) => {
 		if (building.detailsLink) {
@@ -48,7 +47,6 @@ export async function parseRoomsZipFile(zipContent: JSZip): Promise<Map<string, 
 	return fileMap;
 }
 
-
 // Parse room data from HTML, using the building information
 async function parseRoomDataFromHtml(htmlContent: string, building: any): Promise<any[]> {
 	const document = parse5.parse(htmlContent);
@@ -70,32 +68,31 @@ async function parseRoomDataFromHtml(htmlContent: string, building: any): Promis
 	return await Promise.all(rooms);
 }
 
-
 // Fetch geolocation data
-async function fetchGeolocation(address: string):
-	Promise<{ lat?: number, lon?: number, error?: string }> {
+async function fetchGeolocation(address: string): Promise<{ lat?: number; lon?: number; error?: string }> {
 	const encodedAddress = encodeURIComponent(address);
 	const url = `http://cs310.students.cs.ubc.ca:11316/api/v1/project_team222/${encodedAddress}`;
 
 	return new Promise((resolve, reject) => {
-		http.get(url, (resp) => {
-			let data = '';
-			//ChatGPT help to understand how data is received
-			resp.on('data', (chunk) => {
-				data += chunk;
+		http
+			.get(url, (resp) => {
+				let data = "";
+				//ChatGPT help to understand how data is received
+				resp.on("data", (chunk) => {
+					data += chunk;
+				});
+				resp.on("end", () => {
+					try {
+						const geoResponse = JSON.parse(data);
+						resolve(geoResponse);
+					} catch (error) {
+						reject(error);
+					}
+				});
+			})
+			.on("error", (err) => {
+				reject(err);
 			});
-			resp.on('end', () => {
-				try {
-					const geoResponse = JSON.parse(data);
-					resolve(geoResponse);
-				} catch (error) {
-					reject(error);
-				}
-			});
-
-		}).on("error", (err) => {
-			reject(err);
-		});
 	});
 }
 
@@ -107,13 +104,13 @@ async function extractRoomData(row: Node, building: any): Promise<any | null> {
 	const roomTypeNode = findElementByClassName(row, "views-field-field-room-type");
 	const roomInfoNode = findElementByClassName(row, "views-field views-field-nothing");
 
-	const roomNumber = extractRoomNumber(roomNumberNode);
-	const capacity = capacityNode?.childNodes[0]?.value.trim() ?
-		parseFloat(capacityNode.childNodes[0].value.trim()) : null;
+	const capacity = capacityNode?.childNodes[0]?.value.trim()
+		? parseFloat(capacityNode.childNodes[0].value.trim())
+		: null;
 	const furnitureType = furnitureTypeNode?.childNodes[0]?.value.trim() || null;
 	const roomType = roomTypeNode?.childNodes[0]?.value.trim() || null;
 	const roomInfoLink = extractMoreInfoLink(roomInfoNode);
-	const name = building.buildingCode + "_" + roomNumber;
+	const name = building.buildingCode + "_" + extractRoomNumber(roomNumberNode);
 	try {
 		// geolocation data
 		const geoResponse = await fetchGeolocation(building.buildingAddress);
@@ -123,23 +120,22 @@ async function extractRoomData(row: Node, building: any): Promise<any | null> {
 		}
 
 		return {
-			fullname: building.buildingName,      // Full building name
-			shortname: building.buildingCode,     // Short building name
-			number: roomNumber,                   // Room number
-			name: name,                           // Room ID (shortname + room number)
-			address: building.buildingAddress,    // Building address
-			lat: geoResponse.lat,                 // Latitude
-			lon: geoResponse.lon,                 // Longitude
-			seats: capacity,                      // Room capacity (number of seats)
-			type: roomType,                       // Room type
-			furniture: furnitureType,             // Room furniture
-			href: roomInfoLink                    // Full details link
+			fullname: building.buildingName, // Full building name
+			shortname: building.buildingCode, // Short building name
+			number: extractRoomNumber(roomNumberNode), // Room number
+			name: name, // Room ID (shortname + room number)
+			address: building.buildingAddress, // Building address
+			lat: geoResponse.lat, // Latitude
+			lon: geoResponse.lon, // Longitude
+			seats: capacity, // Room capacity (number of seats)
+			type: roomType, // Room type
+			furniture: furnitureType, // Room furniture
+			href: roomInfoLink, // Full details link
 		};
 	} catch (error) {
 		return Promise.reject(error);
 	}
 }
-
 
 // Extract Room number from <a> tag
 function extractRoomNumber(roomNumberNode: any): string | null {
@@ -202,11 +198,11 @@ function extractBuildingData(row: Node): any | null {
 	// We may need to change this to && depending on the requirements
 	return buildingCode || buildingName || buildingAddress
 		? {
-			buildingCode,
-			buildingName,
-			buildingAddress,
-			detailsLink,
-		}
+				buildingCode,
+				buildingName,
+				buildingAddress,
+				detailsLink,
+		  }
 		: null;
 }
 

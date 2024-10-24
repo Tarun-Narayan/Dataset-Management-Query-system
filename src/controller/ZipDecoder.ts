@@ -1,14 +1,11 @@
 import JSZip from "jszip";
-import {InsightDatasetKind, InsightError} from "./IInsightFacade";
+import { InsightDatasetKind, InsightError } from "./IInsightFacade";
 import * as fs from "fs-extra";
 import * as path from "path";
-import {
-	parseRoomsZipFile
-} from "./RoomsAddHelpers";
+import { parseRoomsZipFile } from "./RoomsAddHelpers";
 
 // Path for storing datasets
 const DATASET_DIRECTORY = "./data";
-
 
 // Validate the dataset based on rules for a valid UBC course dataset.
 export function validateDataset(id: string, kind: InsightDatasetKind): void {
@@ -107,7 +104,7 @@ function isValidRoom(room: any): boolean {
 		{ key: "seats", type: "number" },
 		{ key: "type", type: "string" },
 		{ key: "furniture", type: "string" },
-		{ key: "href", type: "string" }
+		{ key: "href", type: "string" },
 	];
 
 	return requiredKeys.every(({ key, type }) => {
@@ -115,8 +112,6 @@ function isValidRoom(room: any): boolean {
 		return typeof value === type && value !== null && value !== undefined;
 	});
 }
-
-
 
 // Processes sections
 export function processSections(fileMap: Map<string, any>): any[] {

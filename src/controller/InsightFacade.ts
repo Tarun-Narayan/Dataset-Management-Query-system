@@ -12,10 +12,10 @@ import {
 	processRooms,
 	processSections,
 	saveDataset,
-	validateDataset
+	validateDataset,
 } from "./ZipDecoder";
-import {Query, validateQuery} from "./Query";
-import {getResults} from "./GetResults";
+import { Query, validateQuery } from "./Query";
+import { getResults } from "./GetResults";
 import path from "node:path";
 import * as fs from "fs-extra";
 
@@ -37,9 +37,9 @@ export default class InsightFacade implements IInsightFacade {
 			let dataset: any[];
 
 			const fileMap = await parseZipFile(content, kind);
-			if(kind === InsightDatasetKind.Rooms){
+			if (kind === InsightDatasetKind.Rooms) {
 				dataset = processRooms(fileMap);
-			} else{
+			} else {
 				dataset = processSections(fileMap);
 			}
 
