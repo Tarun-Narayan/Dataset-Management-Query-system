@@ -28,10 +28,12 @@ describe("InsightFacade", function () {
 
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
+	let rooms: string;
 
 	before(async function () {
 		// This block runs once and loads the datasets.
 		sections = await getContentFromArchives("pair.zip");
+		rooms = await getContentFromArchives("campus.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
@@ -44,89 +46,100 @@ describe("InsightFacade", function () {
 		afterEach(async function () {
 			await clearDisk();
 		});
-
 		it("should reject with an empty dataset id", function () {
-			const result = facade.addDataset("", sections, InsightDatasetKind.Sections);
+			const result = facade.addDataset("", rooms, InsightDatasetKind.Rooms);
+			console.log(result);
 			return expect(result).to.eventually.be.rejectedWith(InsightError);
 		});
-		it("should reject with an id that is only whitespace", function () {
-			const result = facade.addDataset(" ", sections, InsightDatasetKind.Sections);
-			return expect(result).to.eventually.be.rejectedWith(InsightError);
-		});
-		it("should reject with an id with an underscore", function () {
-			const result = facade.addDataset("ubc_", sections, InsightDatasetKind.Sections);
-			return expect(result).to.eventually.be.rejectedWith(InsightError);
-		});
-		it("should reject with an id already saved", async function () {
-			await facade.addDataset("id", sections, InsightDatasetKind.Sections);
-
-			try {
-				await facade.addDataset("id", sections, InsightDatasetKind.Sections);
-				expect.fail("should have rejected");
-			} catch (err) {
-				expect(err).to.be.instanceOf(InsightError);
-			}
-		});
-		it("should reject with an invalid Kind argument", function () {
-			const result = facade.addDataset("id", sections, InsightDatasetKind.Rooms);
-			return expect(result).to.eventually.be.rejectedWith(InsightError);
-		});
-		it("should reject with an invalid Content file argument", async function () {
-			const result = facade.addDataset(
-				"id",
-				await getContentFromArchives("emptydataset.zip"),
-				InsightDatasetKind.Sections
-			);
-			return expect(result).to.eventually.be.rejectedWith(InsightError);
-		});
-		it("should reject with a Content file with no valid sections", async function () {
-			const result = facade.addDataset(
-				"id",
-				await getContentFromArchives("emptysection.zip"),
-				InsightDatasetKind.Sections
-			);
-			return expect(result).to.eventually.be.rejectedWith(InsightError);
-		});
-		it("should reject with an invalid Content argument", function () {
-			const result = facade.addDataset("id", "", InsightDatasetKind.Sections);
-			return expect(result).to.eventually.be.rejectedWith(InsightError);
-		});
-		it("should reject with folder not named courses in Content", async function () {
-			const result = facade.addDataset(
-				"id",
-				await getContentFromArchives("foldername.zip"),
-				InsightDatasetKind.Sections
-			);
-			return expect(result).to.eventually.be.rejectedWith(InsightError);
-		});
-		it("should reject with an invalid course file type", async function () {
-			try {
-				await facade.addDataset("invalidCourseFile", "invalid_course_file_type.zip", InsightDatasetKind.Sections);
-				expect.fail("Should have thrown error");
-			} catch (err) {
-				expect(err).to.be.instanceOf(InsightError);
-			}
-		});
-		it("should reject with an invalid file type (.txt)", async function () {
-			try {
-				await facade.addDataset("invalidTxtFile", "text_file.txt", InsightDatasetKind.Sections);
-				expect.fail("Should have thrown error");
-			} catch (err) {
-				expect(err).to.be.instanceOf(InsightError);
-			}
-		});
-
 		it("should add a valid dataset successfully.", async function () {
-			const result = await facade.addDataset("ubc", sections, InsightDatasetKind.Sections);
+			const result = await facade.addDataset("ubc", rooms, InsightDatasetKind.Rooms);
+			console.log(result);
 			expect(result).to.have.members(["ubc"]);
 		});
-		it("should accept and save more than one valid dataset", async function () {
-			const first = await facade.addDataset("ubc", sections, InsightDatasetKind.Sections);
-			const second = await facade.addDataset("id", sections, InsightDatasetKind.Sections);
 
-			expect(first).to.have.members(["ubc"]);
-			expect(second).to.have.members(["ubc", "id"]);
-		});
+			it("should reject with an empty dataset id", function () {
+				const result = facade.addDataset("", sections, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+
+			it("should reject with an id that is only whitespace", function () {
+				const result = facade.addDataset(" ", sections, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+			it("should reject with an id with an underscore", function () {
+				const result = facade.addDataset("ubc_", sections, InsightDatasetKind.Sections);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+			it("should reject with an id already saved", async function () {
+				await facade.addDataset("id", sections, InsightDatasetKind.Sections);
+
+				try {
+					await facade.addDataset("id", sections, InsightDatasetKind.Sections);
+					expect.fail("should have rejected");
+				} catch (err) {
+					expect(err).to.be.instanceOf(InsightError);
+				}
+			});
+			it("should reject with an invalid Kind argument", function () {
+				const result = facade.addDataset("id", sections, InsightDatasetKind.Rooms);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+			it("should reject with an invalid Content file argument", async function () {
+				const result = facade.addDataset(
+					"id",
+					await getContentFromArchives("emptydataset.zip"),
+					InsightDatasetKind.Sections
+				);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+			it("should reject with a Content file with no valid sections", async function () {
+				const result = facade.addDataset(
+					"id",
+					await getContentFromArchives("emptysection.zip"),
+					InsightDatasetKind.Sections
+				);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+			it("should reject with an invalid Content argument", function () {
+				const result = facade.addDataset("id", "", InsightDatasetKind.Sections);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+			it("should reject with folder not named courses in Content", async function () {
+				const result = facade.addDataset(
+					"id",
+					await getContentFromArchives("foldername.zip"),
+					InsightDatasetKind.Sections
+				);
+				return expect(result).to.eventually.be.rejectedWith(InsightError);
+			});
+			it("should reject with an invalid course file type", async function () {
+				try {
+					await facade.addDataset("invalidCourseFile", "invalid_course_file_type.zip", InsightDatasetKind.Sections);
+					expect.fail("Should have thrown error");
+				} catch (err) {
+					expect(err).to.be.instanceOf(InsightError);
+				}
+			});
+			it("should reject with an invalid file type (.txt)", async function () {
+				try {
+					await facade.addDataset("invalidTxtFile", "text_file.txt", InsightDatasetKind.Sections);
+					expect.fail("Should have thrown error");
+				} catch (err) {
+					expect(err).to.be.instanceOf(InsightError);
+				}
+			});
+
+			it("should add a valid dataset successfully.", async function () {
+				const result = await facade.addDataset("ubc", sections, InsightDatasetKind.Sections);
+				expect(result).to.have.members(["ubc"]);
+			});
+			it("should accept and save more than one valid dataset", async function () {
+				const first = await facade.addDataset("ubc", sections, InsightDatasetKind.Sections);
+				const second = await facade.addDataset("id", sections, InsightDatasetKind.Sections);
+
+				expect(first).to.have.members(["ubc"]);
+				expect(second).to.have.members(["ubc", "id"]);
+			});
 	});
 
 	describe("RemoveDataset", function () {
