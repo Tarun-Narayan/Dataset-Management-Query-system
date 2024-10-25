@@ -5,7 +5,7 @@ export async function handleTransformations(
 	transforms: Transformations,
 	objects: InsightResult[]
 ): Promise<InsightResult[]> {
-	const groupedResults = handleGroup(transforms.GROUP, objects);
+	handleGroup(transforms.GROUP, objects);
 	return [];
 }
 
@@ -18,7 +18,8 @@ function handleGroup(group: string[], objects: InsightResult[]): Record<string, 
 			const value = object[key].toString();
 			groupName = groupName.concat(value, ", ");
 		}
-		groupName = groupName.slice(0, -2);
+		const num = -2;
+		groupName = groupName.slice(0, num);
 		groupName = groupName.concat(" group");
 		if (!groupNames.has(groupName)) {
 			groupNames.add(groupName);
