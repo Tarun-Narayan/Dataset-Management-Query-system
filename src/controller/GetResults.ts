@@ -3,6 +3,7 @@ import path from "path";
 import * as fs from "fs-extra";
 import { Query, LogicComparison, SComparison, MComparison, Negation, Filter } from "./Query";
 import { getResultObject } from "./GetResultObject";
+import { handleTransformations } from "./Transformations";
 const MAX_SIZE = 5000;
 
 export async function getResults(query: Query): Promise<InsightResult[]> {
@@ -12,7 +13,12 @@ export async function getResults(query: Query): Promise<InsightResult[]> {
 		throw new ResultTooLargeError(`Query Result size exceeded: ` + `${MAX_SIZE}`);
 	}
 
-	return getResultObject(query.OPTIONS, Array.from(sections));
+	const objects = await getResultObject(query.OPTIONS, Array.from(sections));
+	if (query.TRANSFORMATIONS) {
+		return handleTransformations(query.TRANSFORMATIONS, objects);
+	}
+
+	return objects;
 }
 
 async function getDataset(
