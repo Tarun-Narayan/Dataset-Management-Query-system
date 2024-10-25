@@ -13,9 +13,10 @@ function getRootFolderName(zipContent: JSZip): string {
 export async function parseRoomsZipFile(zipContent: JSZip): Promise<Map<string, any>> {
 	const fileMap = new Map<string, any>();
 	const rootFolder = getRootFolderName(zipContent);
-	const indexFile = zipContent.files["campus/index.htm"];
+	const indexFilePath = `${rootFolder}/index.htm`;
+	const indexFile = zipContent.files[indexFilePath];
 
-	if (!zipContent.files["campus/index.htm"]) {
+	if (!indexFile) {
 		throw new InsightError("Missing index.htm file in the zip!");
 	}
 
@@ -50,7 +51,6 @@ export async function parseRoomsZipFile(zipContent: JSZip): Promise<Map<string, 
 	if (fileMap.size === 0) {
 		throw new InsightError("No valid rooms found in dataset!");
 	}
-
 	return fileMap;
 }
 
@@ -72,6 +72,7 @@ async function parseRoomDataFromHtml(htmlContent: string, building: any): Promis
 			}
 		}
 	}
+
 	return await Promise.all(rooms);
 }
 

@@ -28,11 +28,13 @@ describe("InsightFacade", function () {
 	// Declare datasets used in tests. You should add more datasets like this!
 	let sections: string;
 	let rooms: string;
+	let differentRooms: string;
 
 	before(async function () {
 		// This block runs once and loads the datasets.
 		sections = await getContentFromArchives("pair.zip");
 		rooms = await getContentFromArchives("campus.zip");
+		differentRooms = await getContentFromArchives("different_name.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
@@ -52,6 +54,28 @@ describe("InsightFacade", function () {
 		it("rooms should add a valid dataset successfully.", async function () {
 			const result = await facade.addDataset("ubc", rooms, InsightDatasetKind.Rooms);
 			expect(result).to.have.members(["ubc"]);
+		});
+		it("rooms should add a valid dataset with a different name successfully ", async function () {
+			const result = await facade.addDataset("id", differentRooms, InsightDatasetKind.Rooms);
+			expect(result).to.have.members(["id"]);
+		});
+
+		it("rooms should reject a zip with missing index.htm", async function () {
+			const result = facade.addDataset(
+				"id",
+				await getContentFromArchives("campus_missing_index.zip"),
+				InsightDatasetKind.Rooms
+			);
+			return expect(result).to.eventually.be.rejectedWith(InsightError);
+		});
+
+		it("rooms should reject when index.htm is missing buildings table", async function () {
+			const result = facade.addDataset(
+				"id",
+				await getContentFromArchives("index_missing_table.zip"),
+				InsightDatasetKind.Rooms
+			);
+			return expect(result).to.eventually.be.rejectedWith(InsightError);
 		});
 
 		it("should reject with an empty dataset id", function () {
