@@ -118,7 +118,7 @@ export async function getResultObject(options: Options, sections: any[]): Promis
 	// Order the results based on options.ORDER (string column name)
 	if (options.ORDER) {
 		const orderKey = options.ORDER; // The column name to order by
-		results = orderResults(results, orderKey); // Use the helper function to order results
+		results = orderResults(results, orderKey as string); // Use the helper function to order results
 	}
 
 	return results;
