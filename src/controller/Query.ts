@@ -39,8 +39,7 @@ export interface Order {
 	keys: string[];
 }
 
-const applyKeys = new Set<string>;
-
+const applyKeys = new Set<string>();
 
 export async function validateQuery(query: Query): Promise<boolean> {
 	let result3 = true;
