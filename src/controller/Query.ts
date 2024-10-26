@@ -305,6 +305,11 @@ async function validateApplyRecord(record: Record<string, string>): Promise<bool
 	if (!(token === "MAX" || token === "MIN" || token === "AVG" || token === "SUM" || token === "COUNT")) {
 		throw new InsightError("Apply token is not formatted correctly");
 	}
+	if (token === "MAX" || token === "MIN" || token === "AVG" || token === "SUM") {
+		if (!(await validateMKey(Object.values(record)[0]))) {
+			throw new InsightError("Key must be numeric");
+		}
+	}
 	const validateKey = await Promise.any([
 		validateSKey(Object.values(record)[0]),
 		validateMKey(Object.values(record)[0]),

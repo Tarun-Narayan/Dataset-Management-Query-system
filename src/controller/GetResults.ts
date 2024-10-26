@@ -1,9 +1,10 @@
 import { InsightDatasetKind, InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 import path from "path";
 import * as fs from "fs-extra";
-import { Query, LogicComparison, SComparison, MComparison, Negation, Filter } from "./Query";
+import { Filter, LogicComparison, MComparison, Negation, Query, SComparison } from "./Query";
 import { getResultObject } from "./GetResultObject";
 import { handleTransformations } from "./Transformations";
+
 const MAX_SIZE = 5000;
 
 export async function getResults(query: Query): Promise<InsightResult[]> {
@@ -145,7 +146,7 @@ async function handleMComparison(
 ): Promise<any[]> {
 	const sections = new Set<any>();
 	let record: Record<string, number> = { "": 0 };
-	let type = "";
+	let type = "GT";
 	if (filter.EQ) {
 		record = filter.EQ;
 		type = "EQ";
@@ -154,19 +155,22 @@ async function handleMComparison(
 		type = "LT";
 	} else if (filter.GT) {
 		record = filter.GT;
-		type = "GT";
 	}
 	const [MKey, input] = Object.entries(record)[0];
-	const id = MKey.split("_")[0];
-	const field = MKey.split("_")[1];
-	if (id !== dataset.id) {
+	if (MKey.split("_")[0] !== dataset.id) {
 		throw new InsightError("Query references multiple datasets");
 	}
 
 	await Promise.all(
 		dataset.sections.map(async (section) => {
-			if (await checkMSection(section, field, input, type)) {
-				sections.add(section);
+			if (dataset.kind === InsightDatasetKind.Sections) {
+				if (await checkMSection(section, MKey.split("_")[1], input, type)) {
+					sections.add(section);
+				}
+			} else {
+				if (await checkMRoom(section, MKey.split("_")[1], input, type)) {
+					sections.add(section);
+				}
 			}
 		})
 	);
@@ -189,8 +193,14 @@ async function handleSComparison(
 
 	await Promise.all(
 		dataset.sections.map(async (section) => {
-			if (await checkSSection(section, field, input)) {
-				sections.add(section);
+			if (dataset.kind === InsightDatasetKind.Rooms) {
+				if (await checkSSection(section, field, input)) {
+					sections.add(section);
+				}
+			} else {
+				if (await checkSRoom(section, field, input)) {
+					sections.add(section);
+				}
 			}
 		})
 	);
@@ -212,7 +222,35 @@ async function checkSSection(section: any, field: string, input: string): Promis
 	if (field === "instructor") {
 		toCompare = section.Professor;
 	}
+	return handleSCompare(input, toCompare);
+}
+async function checkSRoom(section: any, field: string, input: string): Promise<Boolean> {
+	let toCompare: string = section.fullname;
+	if (field === "shortname") {
+		toCompare = section.shortname;
+	}
+	if (field === "number") {
+		toCompare = section.number;
+	}
+	if (field === "name") {
+		toCompare = section.name;
+	}
+	if (field === "address") {
+		toCompare = section.address;
+	}
+	if (field === "type") {
+		toCompare = section.type;
+	}
+	if (field === "furniture") {
+		toCompare = section.furniture;
+	}
+	if (field === "href") {
+		toCompare = section.href;
+	}
+	return handleSCompare(input, toCompare);
+}
 
+async function handleSCompare(input: string, toCompare: string): Promise<boolean> {
 	if (input.startsWith("*") && input.endsWith("*")) {
 		return toCompare.includes(input.slice(1, -1));
 	}
@@ -248,7 +286,23 @@ async function checkMSection(section: any, field: string, input: number, type: s
 	}
 	return toCompare < input;
 }
+async function checkMRoom(section: any, field: string, input: number, type: string): Promise<Boolean> {
+	let toCompare: number = section.lat;
+	if (field === "lon") {
+		toCompare = section.lon;
+	}
+	if (field === "seats") {
+		toCompare = section.seats;
+	}
 
+	if (type === "GT") {
+		return toCompare > input;
+	}
+	if (type === "EQ") {
+		return toCompare === input;
+	}
+	return toCompare < input;
+}
 async function handleNegation(
 	filter: Negation,
 	dataset: { id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }
