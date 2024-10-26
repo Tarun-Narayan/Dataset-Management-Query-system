@@ -1,4 +1,4 @@
-import { Transformations } from "./Query";
+import { ApplyRule, Transformations } from "./Query";
 import { InsightResult } from "./IInsightFacade";
 
 export async function handleTransformations(
@@ -6,7 +6,7 @@ export async function handleTransformations(
 	objects: InsightResult[]
 ): Promise<InsightResult[]> {
 	const groupedResults = handleGroup(transforms.GROUP, objects);
-	return [];
+	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP);
 }
 
 function handleGroup(group: string[], objects: InsightResult[]): Record<string, InsightResult[]> {
@@ -18,7 +18,8 @@ function handleGroup(group: string[], objects: InsightResult[]): Record<string, 
 			const value = object[key].toString();
 			groupName = groupName.concat(value, ", ");
 		}
-		groupName = groupName.slice(0, -2);
+		const toErase = -2;
+		groupName = groupName.slice(0, toErase);
 		groupName = groupName.concat(" group");
 		if (!groupNames.has(groupName)) {
 			groupNames.add(groupName);
@@ -29,4 +30,12 @@ function handleGroup(group: string[], objects: InsightResult[]): Record<string, 
 		result[groupName] = value;
 	}
 	return result;
+}
+
+async function handleApply(
+	apply: ApplyRule[],
+	groups: Record<string, InsightResult[]>,
+	fields: string[]
+): Promise<InsightResult[]> {
+	return [];
 }
