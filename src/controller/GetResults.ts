@@ -1,9 +1,9 @@
-import {InsightDatasetKind, InsightError, InsightResult, ResultTooLargeError} from "./IInsightFacade";
+import { InsightDatasetKind, InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 import path from "path";
 import * as fs from "fs-extra";
-import {Filter, LogicComparison, MComparison, Negation, Query, SComparison} from "./Query";
-import {getResultObject} from "./GetResultObject";
-import {handleTransformations} from "./Transformations";
+import { Filter, LogicComparison, MComparison, Negation, Query, SComparison } from "./Query";
+import { getResultObject } from "./GetResultObject";
+import { handleTransformations } from "./Transformations";
 
 const MAX_SIZE = 5000;
 
