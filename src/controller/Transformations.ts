@@ -10,6 +10,7 @@ export async function handleTransformations(
 ): Promise<InsightResult[]> {
 	const groupedResults = handleGroup(transforms.GROUP, objects);
 	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP);
+
 }
 
 function handleGroup(group: string[], objects: InsightResult[]): Record<string, InsightResult[]> {

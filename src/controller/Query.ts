@@ -234,7 +234,7 @@ async function validateSKey(sKey: string): Promise<boolean> {
 }
 
 async function validateInputString(string: string): Promise<boolean> {
-	const stringPattern = /^\*?[^*]+\*?$/;
+	const stringPattern = /^\*?[^*]*\*?$/;
 	if (stringPattern.test(string)) {
 		return true;
 	}

@@ -2,11 +2,18 @@ import {
 	IInsightFacade,
 	InsightDataset,
 	InsightDatasetKind,
-	InsightResult,
 	InsightError,
+	InsightResult,
 	NotFoundError,
 } from "./IInsightFacade";
-import { validateDataset, parseZipFile, processSections, saveDataset, getStoredDatasetIds } from "./ZipDecoder";
+import {
+	getStoredDatasetIds,
+	parseZipFile,
+	processRooms,
+	processSections,
+	saveDataset,
+	validateDataset,
+} from "./ZipDecoder";
 import { Query, validateQuery } from "./Query";
 import { getResults } from "./GetResults";
 import path from "node:path";
@@ -27,10 +34,16 @@ export default class InsightFacade implements IInsightFacade {
 			if (idsList.includes(id)) {
 				return Promise.reject(new InsightError(`Dataset with id ${id} already exists.`));
 			}
+			let dataset: any[];
 
-			const fileMap = await parseZipFile(content);
-			const sections = processSections(fileMap);
-			await saveDataset(id, sections, kind);
+			const fileMap = await parseZipFile(content, kind);
+			if (kind === InsightDatasetKind.Rooms) {
+				dataset = processRooms(fileMap);
+			} else {
+				dataset = processSections(fileMap);
+			}
+
+			await saveDataset(id, dataset, kind);
 
 			// Return the list of all dataset IDs on disk
 			const updatedIds = await getStoredDatasetIds();

@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import { InsightDatasetKind, InsightError } from "./IInsightFacade";
 import * as fs from "fs-extra";
 import * as path from "path";
+import { parseRoomsZipFile } from "./RoomsAddHelpers";
 
 // Path for storing datasets
 const DATASET_DIRECTORY = "./data";
@@ -11,12 +12,13 @@ export function validateDataset(id: string, kind: InsightDatasetKind): void {
 	if (id.trim().length === 0 || id.includes("_")) {
 		throw new InsightError("Invalid ID: ID is empty, only whitespace, or contains an underscore.");
 	}
-	if (kind !== InsightDatasetKind.Sections) {
-		throw new InsightError("Invalid Dataset Kind: Only 'Sections' is supported.");
+	if (kind !== InsightDatasetKind.Sections && kind !== InsightDatasetKind.Rooms) {
+		throw new InsightError("Invalid Dataset Kind: Only 'Sections' and 'Rooms' is supported.");
 	}
 }
 
-export async function parseZipFile(content: string): Promise<Map<string, any>> {
+//Parse the zip file: either rooms or sections
+export async function parseZipFile(content: string, kind: InsightDatasetKind): Promise<Map<string, any>> {
 	const zip = new JSZip();
 	let zipContent: JSZip;
 
@@ -27,12 +29,22 @@ export async function parseZipFile(content: string): Promise<Map<string, any>> {
 		throw new InsightError("Invalid Zip File!");
 	}
 
+	if (kind === InsightDatasetKind.Rooms) {
+		return await parseRoomsZipFile(zipContent);
+	} else if (kind === InsightDatasetKind.Sections) {
+		return await parseSectionsZipFile(zipContent);
+	} else {
+		throw new InsightError("Unsupported dataset kind!");
+	}
+}
+// Function to parse sections dataset
+async function parseSectionsZipFile(zipContent: JSZip): Promise<Map<string, any>> {
+	const fileMap = new Map<string, any>();
+
 	// Check if the zip file contains the "courses" folder
 	if (!zipContent.files?.["courses/"]) {
 		throw new InsightError("'courses' folder is missing in the zip file!");
 	}
-
-	const fileMap = new Map<string, any>();
 
 	// Parse files in the courses folder
 	await Promise.all(
@@ -43,11 +55,11 @@ export async function parseZipFile(content: string): Promise<Map<string, any>> {
 				if (!file.dir) {
 					const fileContent = await file.async("string");
 					try {
-						// parse the file content as JSON
+						// Parse the file content as JSON
 						const jsonContent = JSON.parse(fileContent);
 						fileMap.set(fileName, jsonContent);
 					} catch (_err) {
-						throw new InsightError(`Invalid file type within courses directory`);
+						// Do nothing
 					}
 				}
 			}
@@ -60,6 +72,45 @@ export async function parseZipFile(content: string): Promise<Map<string, any>> {
 	}
 
 	return fileMap;
+}
+
+// Process rooms based on the room dataset specification
+export function processRooms(fileMap: Map<string, any>): any[] {
+	const rooms: any[] = [];
+	fileMap.forEach((buildingRooms) => {
+		for (const room of buildingRooms) {
+			if (isValidRoom(room)) {
+				rooms.push(room);
+			}
+		}
+	});
+
+	if (rooms.length === 0) {
+		throw new InsightError("No valid rooms found in dataset!");
+	}
+	return rooms;
+}
+
+// Validate if a room contains all required fields with correct types
+function isValidRoom(room: any): boolean {
+	const requiredKeys = [
+		{ key: "fullname", type: "string" },
+		{ key: "shortname", type: "string" },
+		{ key: "number", type: "string" },
+		{ key: "name", type: "string" },
+		{ key: "address", type: "string" },
+		{ key: "lat", type: "number" },
+		{ key: "lon", type: "number" },
+		{ key: "seats", type: "number" },
+		{ key: "type", type: "string" },
+		{ key: "furniture", type: "string" },
+		{ key: "href", type: "string" },
+	];
+
+	return requiredKeys.every(({ key, type }) => {
+		const value = room[key];
+		return typeof value === type && value !== null && value !== undefined;
+	});
 }
 
 // Processes sections
@@ -83,7 +134,6 @@ export function processSections(fileMap: Map<string, any>): any[] {
 	if (sections.length === 0) {
 		throw new InsightError("No valid sections found in dataset!");
 	}
-
 	return sections;
 }
 
