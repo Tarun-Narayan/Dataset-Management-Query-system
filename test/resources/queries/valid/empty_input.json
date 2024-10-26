@@ -1,0 +1,22 @@
+{
+	"title": "Test empty input to query",
+	"input": {
+		"WHERE": {
+			"NOT": {
+				"NOT": {
+					"IS": {
+						"sections_dept": ""
+					}
+				}
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_avg"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": []
+}
