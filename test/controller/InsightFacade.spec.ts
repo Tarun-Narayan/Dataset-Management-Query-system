@@ -209,14 +209,14 @@ describe("InsightFacade", function () {
 		});
 
 		it("should list one dataset", async function () {
-			await facade.addDataset("ubc", sections, InsightDatasetKind.Sections);
+			await facade.addDataset("ubc", rooms, InsightDatasetKind.Rooms);
 
 			const datasets = await facade.listDatasets();
 			expect(datasets).to.deep.equal([
 				{
 					id: "ubc",
-					kind: InsightDatasetKind.Sections,
-					numRows: 64612,
+					kind: InsightDatasetKind.Rooms,
+					numRows: 364,
 				},
 			]);
 		});
@@ -289,6 +289,7 @@ describe("InsightFacade", function () {
 		// The relative path to the query file must be given in square brackets.
 
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
+		it("[valid/rooms.json] Rooms", checkQuery);
 		it("[valid/wildcard_first.json] Query with wildcard put first", checkQuery);
 		it("[valid/wildcard_last.json] Query with wildcard put last", checkQuery);
 		it("[valid/wildcard_contains.json] Query with wildcard put both sides", checkQuery);
@@ -296,8 +297,6 @@ describe("InsightFacade", function () {
 		it("[valid/or.json] Query using or logic", checkQuery);
 		it("[valid/equal.json] Query using equal comparator", checkQuery);
 		it("[valid/complex.json] Very complex valid query", checkQuery);
-		it("[valid/sComparison_test.json] SELECT sections WHERE instructor contains 'pres'", checkQuery);
-
 		it("[valid/sComparison_test.json] SELECT sections WHERE instructor contains 'pres'", checkQuery);
 		it("[valid/empty_input.json] Test empty input to query", checkQuery);
 		it("[valid/empty_result.json] Test empty result to query", checkQuery);

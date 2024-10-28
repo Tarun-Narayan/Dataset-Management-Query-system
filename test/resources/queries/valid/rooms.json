@@ -3,15 +3,13 @@
 	"input": {
 		"WHERE": {
 			"GT": {
-				"rooms_seats": 97
+				"rooms_seats": 0
 			}
 		},
 		"OPTIONS": {
 			"COLUMNS": [
-				"rooms_furniture",
-				"rooms_seats"
-			],
-			"ORDER": "rooms_seats"
+				"rooms_name"
+			]
 		}
 	},
 	"errorExpected": false,
