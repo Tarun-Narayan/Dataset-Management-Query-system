@@ -44,6 +44,7 @@ export default class InsightFacade implements IInsightFacade {
 			}
 
 			await saveDataset(id, dataset, kind);
+			// console.log(dataset);
 
 			// Return the list of all dataset IDs on disk
 			const updatedIds = await getStoredDatasetIds();
