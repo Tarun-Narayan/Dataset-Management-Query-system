@@ -270,7 +270,9 @@ describe("InsightFacade", function () {
 
 			// Add the datasets to InsightFacade once.
 			// Will *fail* if there is a problem reading ANY dataset.
-			const loadDatasetPromises: Promise<string[]>[] = [facade.addDataset("sections", sections, InsightDatasetKind.Sections)];
+			const loadDatasetPromises: Promise<string[]>[] = [
+				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+			];
 
 			try {
 				await Promise.all(loadDatasetPromises);
