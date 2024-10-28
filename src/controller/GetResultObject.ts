@@ -1,5 +1,5 @@
 import { InsightError, InsightResult } from "./IInsightFacade";
-import { Options } from "./Query";
+import { Options, Order } from "./Query";
 
 // Data file to dataset mapping.
 const mapping: Record<string, string> = {
@@ -68,7 +68,7 @@ function filterResultKeys(resultEntry: any, columns: string[]): any {
 }
 
 // Order results based on the specified key
-function orderResults(results: InsightResult[], orderKey: string): InsightResult[] {
+function orderResultsSingle(results: InsightResult[], orderKey: string): InsightResult[] {
 	return results.sort((a, b) => {
 		const aValue = a[orderKey];
 		const bValue = b[orderKey];
@@ -87,6 +87,52 @@ function orderResults(results: InsightResult[], orderKey: string): InsightResult
 			}
 			return 0;
 		}
+	});
+}
+
+function orderStringResult(aString: string, bString: string, dir: string): number {
+	if (dir === "UP") {
+		if (aString < bString) {
+			return -1; //Ascending
+		}
+		if (aString > bString) {
+			return 1; //Descending
+		}
+	} else {
+		if (aString > bString) {
+			return -1; //Ascending
+		}
+		if (aString < bString) {
+			return 1; //Descending
+		}
+	}
+	return 0;
+}
+
+function orderResults(results: InsightResult[], orderKeys: string[], dir: string): InsightResult[] {
+	return results.sort((a, b) => {
+		for (const key of orderKeys) {
+			const aValue = a[key];
+			const bValue = b[key];
+			if (typeof aValue === "number" && typeof bValue === "number") {
+				if (aValue - bValue !== 0) {
+					if (dir === "UP") {
+						return aValue - bValue;
+					} else {
+						return bValue - aValue;
+					}
+				}
+			} else {
+				// String comparison
+				const aString = String(aValue);
+				const bString = String(bValue);
+				const result = orderStringResult(aString, bString, dir);
+				if (result !== 0) {
+					return result;
+				}
+			}
+		}
+		return 0;
 	});
 }
 
@@ -116,9 +162,13 @@ export async function getResultObject(options: Options, sections: any[]): Promis
 	}
 
 	// Order the results based on options.ORDER (string column name)
-	if (options.ORDER) {
+	if (typeof options.ORDER === "string") {
 		const orderKey = options.ORDER; // The column name to order by
-		results = orderResults(results, orderKey as string); // Use the helper function to order results
+		results = orderResultsSingle(results, orderKey); // Use the helper function to order results
+	} else if (options.ORDER) {
+		const orderKeys = (options.ORDER as Order).keys;
+		const dir = (options.ORDER as Order).dir;
+		results = orderResults(results, orderKeys, dir);
 	}
 
 	return results;
