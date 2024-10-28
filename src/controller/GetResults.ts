@@ -193,7 +193,7 @@ async function handleSComparison(
 
 	await Promise.all(
 		dataset.sections.map(async (section) => {
-			if (dataset.kind === InsightDatasetKind.Rooms) {
+			if (dataset.kind === InsightDatasetKind.Sections) {
 				if (await checkSSection(section, field, input)) {
 					sections.add(section);
 				}

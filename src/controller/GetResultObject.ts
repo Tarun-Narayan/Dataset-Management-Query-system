@@ -13,6 +13,17 @@ const mapping: Record<string, string> = {
 	Pass: "pass",
 	Fail: "fail",
 	Audit: "audit",
+	lat: "lat",
+	lon: "lon",
+	seats: "seats",
+	fullname: "fullname",
+	shortname: "shortname",
+	number: "number",
+	name: "name",
+	address: "address",
+	type: "type",
+	furniture: "furniture",
+	href: "href",
 };
 
 // Map section keys to result keys
