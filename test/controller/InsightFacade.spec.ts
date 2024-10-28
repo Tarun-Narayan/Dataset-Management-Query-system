@@ -301,7 +301,7 @@ describe("InsightFacade", function () {
 		it("[valid/rooms.json] Query using ROOMS section", checkQuery);
 		it("[valid/empty_input.json] Test empty input to query", checkQuery);
 		it("[valid/empty_result.json] Test empty result to query", checkQuery);
-
+		it("[valid/transformation.json] Query using a complex transformation", checkQuery);
 		it("[valid/single_and.json] Query using AND logic with one filter", checkQuery);
 		it("[valid/single_or.json] Query using OR logic with one filter", checkQuery);
 

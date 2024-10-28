@@ -1,5 +1,5 @@
-import {InsightDatasetKind, InsightError, InsightResult} from "./IInsightFacade";
-import {Options, Order, validateMKey, validateSKey} from "./Query";
+import { InsightError, InsightResult } from "./IInsightFacade";
+import { Options, Order } from "./Query";
 
 // Data file to dataset mapping.
 const mapping: Record<string, string> = {
