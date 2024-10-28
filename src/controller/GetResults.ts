@@ -22,7 +22,7 @@ export async function getResults(query: Query): Promise<InsightResult[]> {
 	return objects;
 }
 
-async function getDataset(
+export async function getDataset(
 	query: Query
 ): Promise<{ id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }> {
 	try {
