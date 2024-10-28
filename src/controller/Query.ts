@@ -179,7 +179,7 @@ async function validateOptions(options: Options, kind: InsightDatasetKind): Prom
 	// start chatGPT for help iterating with promises against linter
 	const validationResults = await Promise.all(
 		options.COLUMNS.map(async (key) => {
-			return Promise.any([validateSKey(key, kind), validateMKey(key, kind), validateApplyKey(key)]).catch(() => false);
+			return Promise.any([validateSKey(key, kind), validateMKey(key, kind), applyKeys.has(key)]).catch(() => false);
 		})
 	);
 	// end chatGPT for help iterating with promises
@@ -217,7 +217,7 @@ async function validateSort(order: string | Order, options: Options): Promise<bo
 	return true;
 }
 
-async function validateMKey(mKey: string, kind: InsightDatasetKind): Promise<boolean> {
+export async function validateMKey(mKey: string, kind: InsightDatasetKind): Promise<boolean> {
 	const mKeyPatternRoom = /^[^_]+_(lat|lon|seats)$/;
 	// start chatGPT help asserting string pattern
 	const mKeyPatternSection = /^[^_]+_(avg|pass|fail|audit|year)$/;
@@ -235,7 +235,7 @@ async function validateMKey(mKey: string, kind: InsightDatasetKind): Promise<boo
 }
 
 // start adapted from chatGPT
-async function validateSKey(sKey: string, kind: InsightDatasetKind): Promise<boolean> {
+export async function validateSKey(sKey: string, kind: InsightDatasetKind): Promise<boolean> {
 	const sKeyPatternSection = /^[^_]+_(dept|id|instructor|title|uuid)$/;
 	const sKeyPatternRoom = /^[^_]+_(fullname|shortname|number|name|address|type|furniture|href)$/;
 	if (kind === InsightDatasetKind.Sections) {
@@ -258,7 +258,11 @@ async function validateInputString(string: string): Promise<boolean> {
 	throw new InsightError("InputString not formatted correctly");
 }
 
-async function validateTransformations(transform: Transformations, columns: string[], kind: InsightDatasetKind): Promise<boolean> {
+async function validateTransformations(
+	transform: Transformations,
+	columns: string[],
+	kind: InsightDatasetKind
+): Promise<boolean> {
 	if (transform.GROUP.length === 0) {
 		throw new InsightError("Group cannot be empty array");
 	}
@@ -292,7 +296,7 @@ async function validateTransformations(transform: Transformations, columns: stri
 	return true;
 }
 
-async function validateApplyRule(rule: ApplyRule, kind : InsightDatasetKind): Promise<boolean> {
+async function validateApplyRule(rule: ApplyRule, kind: InsightDatasetKind): Promise<boolean> {
 	if (Object.keys(rule).length !== 1) {
 		throw new InsightError("Too many keys in ApplyRule");
 	}
