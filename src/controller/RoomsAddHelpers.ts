@@ -112,11 +112,9 @@ async function extractRoomData(row: any, building: any): Promise<any | null> {
 	const roomTypeNode = findElementByClassName(row, "views-field-field-room-type");
 	const roomInfoNode = findElementByClassName(row, "views-field views-field-nothing");
 
-	const capacity = capacityNode?.childNodes[0]?.value.trim()
-		? parseFloat(capacityNode.childNodes[0].value.trim())
-		: null;
-	const furnitureType = furnitureTypeNode?.childNodes[0]?.value.trim() || null;
-	const roomType = roomTypeNode?.childNodes[0]?.value.trim() || null;
+	const capacity = parseFloat(capacityNode.childNodes[0].value.trim());
+	const furnitureType = furnitureTypeNode.childNodes[0].value.trim();
+	const roomType = roomTypeNode.childNodes[0].value.trim();
 	const roomInfoLink = extractMoreInfoLink(roomInfoNode);
 	const name = building.buildingCode + "_" + extractRoomNumber(roomNumberNode);
 	try {
