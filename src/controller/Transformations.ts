@@ -34,7 +34,6 @@ export async function handleTransformations(
 	sections: any[]
 ): Promise<InsightResult[]> {
 	const groupedResults = handleGroup(transforms.GROUP, objects);
-	console.log(groupedResults);
 	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP, sections);
 }
 
