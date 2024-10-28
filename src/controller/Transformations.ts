@@ -1,5 +1,5 @@
-import { ApplyRule, Transformations } from "./Query";
-import { InsightResult } from "./IInsightFacade";
+import { ApplyRule, Transformations, validateMKey, validateSKey } from "./Query";
+import { InsightDatasetKind, InsightError, InsightResult } from "./IInsightFacade";
 import Decimal from "decimal.js";
 
 const rounding = 2;
@@ -174,4 +174,27 @@ function getSection(sections: any[], insight: InsightResult): any {
 		}
 		return false;
 	});
+}
+
+export async function validateApplyRecord(record: Record<string, string>, kind: InsightDatasetKind): Promise<boolean> {
+	if (Object.keys(record).length !== 1) {
+		throw new InsightError("Incorrect number of keys in Apply Record");
+	}
+	const token = Object.keys(record)[0];
+	if (!(token === "MAX" || token === "MIN" || token === "AVG" || token === "SUM" || token === "COUNT")) {
+		throw new InsightError("Apply token is not formatted correctly");
+	}
+	if (token === "MAX" || token === "MIN" || token === "AVG" || token === "SUM") {
+		if (!(await validateMKey(Object.values(record)[0], kind))) {
+			throw new InsightError("Key must be numeric");
+		}
+	}
+	const validateKey = await Promise.any([
+		validateSKey(Object.values(record)[0], kind),
+		validateMKey(Object.values(record)[0], kind),
+	]).catch(() => false);
+	if (!validateKey) {
+		throw new InsightError("Apply rule key not MKey or SKey");
+	}
+	return true;
 }

@@ -1,5 +1,6 @@
 import { InsightDatasetKind, InsightError } from "./IInsightFacade";
 import { getDataset } from "./GetResults";
+import { validateApplyRecord } from "./Transformations";
 
 export interface Query extends Object {
 	WHERE: Filter;
@@ -168,7 +169,7 @@ async function validateNegation(filter: Negation, kind: InsightDatasetKind): Pro
 	throw new InsightError("Negation not formatted correctly");
 }
 
-async function validateOptions(options: Options, kind: InsightDatasetKind): Promise<boolean> {
+async function validateOptions(options: Options, k: InsightDatasetKind): Promise<boolean> {
 	const maxKeys = 2;
 	if (Object.keys(options).length === 0 || Object.keys(options).length > maxKeys) {
 		throw new InsightError("Options not formatted correctly");
@@ -179,7 +180,7 @@ async function validateOptions(options: Options, kind: InsightDatasetKind): Prom
 	// start chatGPT for help iterating with promises against linter
 	const validationResults = await Promise.all(
 		options.COLUMNS.map(async (key) => {
-			return Promise.any([validateSKey(key, kind), validateMKey(key, kind), applyKeys.has(key)]).catch(() => false);
+			return Promise.any([validateSKey(key, k), validateMKey(key, k), applyKeys.has(key)]).catch(() => false);
 		})
 	);
 	// end chatGPT for help iterating with promises
@@ -316,27 +317,4 @@ function validateApplyKey(key: string): boolean {
 		throw new InsightError("Apply Keys must be unique");
 	}
 	return applyKeyPattern.test(key);
-}
-
-async function validateApplyRecord(record: Record<string, string>, kind: InsightDatasetKind): Promise<boolean> {
-	if (Object.keys(record).length !== 1) {
-		throw new InsightError("Incorrect number of keys in Apply Record");
-	}
-	const token = Object.keys(record)[0];
-	if (!(token === "MAX" || token === "MIN" || token === "AVG" || token === "SUM" || token === "COUNT")) {
-		throw new InsightError("Apply token is not formatted correctly");
-	}
-	if (token === "MAX" || token === "MIN" || token === "AVG" || token === "SUM") {
-		if (!(await validateMKey(Object.values(record)[0], kind))) {
-			throw new InsightError("Key must be numeric");
-		}
-	}
-	const validateKey = await Promise.any([
-		validateSKey(Object.values(record)[0], kind),
-		validateMKey(Object.values(record)[0], kind),
-	]).catch(() => false);
-	if (!validateKey) {
-		throw new InsightError("Apply rule key not MKey or SKey");
-	}
-	return true;
 }
