@@ -13,7 +13,7 @@ function getRootFolderName(zipContent: JSZip): string {
 export async function parseRoomsZipFile(zipContent: JSZip): Promise<Map<string, any>> {
 	const fileMap = new Map<string, any>();
 	const rootFolder = getRootFolderName(zipContent);
-	const indexFilePath = `${rootFolder}/index.htm`;
+	const indexFilePath = "index.htm";
 	const indexFile = zipContent.files[indexFilePath];
 
 	if (!indexFile) {
@@ -31,7 +31,7 @@ export async function parseRoomsZipFile(zipContent: JSZip): Promise<Map<string, 
 		if (building.detailsLink) {
 			const two = 2;
 			//Accessing the building files
-			const res = `${rootFolder}/${building.detailsLink.substring(two).trim()}`;
+			const res = `${building.detailsLink.substring(two).trim()}`;
 			const buildingFile = zipContent.files[res];
 
 			if (buildingFile) {
