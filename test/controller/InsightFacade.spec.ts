@@ -272,6 +272,7 @@ describe("InsightFacade", function () {
 			// Will *fail* if there is a problem reading ANY dataset.
 			const loadDatasetPromises: Promise<string[]>[] = [
 				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				facade.addDataset("rooms", rooms, InsightDatasetKind.Rooms),
 			];
 
 			try {
@@ -298,9 +299,10 @@ describe("InsightFacade", function () {
 		it("[valid/equal.json] Query using equal comparator", checkQuery);
 		it("[valid/complex.json] Very complex valid query", checkQuery);
 		it("[valid/sComparison_test.json] SELECT sections WHERE instructor contains 'pres'", checkQuery);
+		it("[valid/rooms.json] Query using ROOMS section", checkQuery);
 		it("[valid/empty_input.json] Test empty input to query", checkQuery);
 		it("[valid/empty_result.json] Test empty result to query", checkQuery);
-
+		it("[valid/transformation.json] Query using a complex transformation", checkQuery);
 		it("[valid/single_and.json] Query using AND logic with one filter", checkQuery);
 		it("[valid/single_or.json] Query using OR logic with one filter", checkQuery);
 

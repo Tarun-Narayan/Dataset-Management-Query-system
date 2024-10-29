@@ -1,15 +1,40 @@
-import { ApplyRule, Transformations } from "./Query";
-import { InsightResult } from "./IInsightFacade";
+import { ApplyRule, Transformations, validateMKey, validateSKey } from "./Query";
+import { InsightDatasetKind, InsightError, InsightResult } from "./IInsightFacade";
 import Decimal from "decimal.js";
 
 const rounding = 2;
+const mapping: Record<string, string> = {
+	uuid: "id",
+	id: "Course",
+	title: "Title",
+	instructor: "Professor",
+	dept: "Subject",
+	year: "Year",
+	avg: "Avg",
+	pass: "Pass",
+	fail: "Fail",
+	audit: "Audit",
+	lat: "lat",
+	lon: "lon",
+	seats: "seats",
+	fullname: "fullname",
+	shortname: "shortname",
+	number: "number",
+	name: "name",
+	address: "address",
+	type: "type",
+	furniture: "furniture",
+	href: "href",
+};
+const addedSections = new Set<any>();
 
 export async function handleTransformations(
 	transforms: Transformations,
-	objects: InsightResult[]
+	objects: InsightResult[],
+	sections: any[]
 ): Promise<InsightResult[]> {
 	const groupedResults = handleGroup(transforms.GROUP, objects);
-	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP);
+	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP, sections);
 }
 
 function handleGroup(group: string[], objects: InsightResult[]): Record<string, InsightResult[]> {
@@ -38,7 +63,8 @@ function handleGroup(group: string[], objects: InsightResult[]): Record<string, 
 async function handleApply(
 	apply: ApplyRule[],
 	groups: Record<string, InsightResult[]>,
-	fields: string[]
+	fields: string[],
+	sections: any[]
 ): Promise<InsightResult[]> {
 	const result = new Array<InsightResult>();
 	for (const rule of apply) {
@@ -47,79 +73,128 @@ async function handleApply(
 			for (const field of fields) {
 				toAdd[field] = group[0][field];
 			}
-			toAdd[Object.keys(rule)[0]] = handleRule(rule, group);
+			toAdd[Object.keys(rule)[0]] = handleRule(rule, group, sections);
 			result.push(toAdd);
 		}
 	}
 	return result;
 }
 
-function handleRule(rule: ApplyRule, group: InsightResult[]): number {
+function handleRule(rule: ApplyRule, group: InsightResult[], sections: any[]): number {
 	const token = Object.keys(Object.values(rule)[0])[0];
 	const key = Object.values(Object.values(rule)[0])[0];
 	let result = 0;
 	if (token === "AVG") {
-		result = handleAverage(group, key);
+		result = handleAverage(group, key, sections);
 	}
 	if (token === "MAX") {
-		result = handleMax(group, key);
+		result = handleMax(group, key, sections);
 	}
 	if (token === "MIN") {
-		result = handleMin(group, key);
+		result = handleMin(group, key, sections);
 	}
 	if (token === "SUM") {
-		result = handleSum(group, key);
+		result = handleSum(group, key, sections);
 	}
 	if (token === "COUNT") {
-		result = handleCount(group, key);
+		result = handleCount(group, key, sections);
 	}
 	return result;
 }
 
-function handleAverage(group: InsightResult[], key: string): number {
+function handleAverage(group: InsightResult[], key: string, sections: any[]): number {
 	let total = new Decimal(0);
 	let numRows = 0;
 	for (const insight of group) {
-		const decimal = new Decimal(insight[key] as number);
+		const section = getSection(sections, insight);
+		const mappedKey = mapping[key.split("_")[1]];
+		const decimal = new Decimal(section[mappedKey] as number);
 		total = total.add(decimal);
 		numRows++;
 	}
 	const avg = total.toNumber() / numRows;
 	return Number(avg.toFixed(rounding));
 }
-function handleMax(group: InsightResult[], key: string): number {
+function handleMax(group: InsightResult[], key: string, sections: any[]): number {
 	let currentMax = group[0][key] as number;
 	for (const insight of group) {
-		if (insight[key] > currentMax) {
+		const section = getSection(sections, insight);
+		const mappedKey = mapping[key.split("_")[1]];
+		if (section[mappedKey] > currentMax) {
 			currentMax = insight[key] as number;
 		}
 	}
 	return currentMax;
 }
-function handleMin(group: InsightResult[], key: string): number {
+function handleMin(group: InsightResult[], key: string, sections: any[]): number {
 	let currentMin = group[0][key] as number;
 	for (const insight of group) {
-		if (insight[key] < currentMin) {
+		const section = getSection(sections, insight);
+		const mappedKey = mapping[key.split("_")[1]];
+		if (section[mappedKey] < currentMin) {
 			currentMin = insight[key] as number;
 		}
 	}
 	return currentMin;
 }
-function handleSum(group: InsightResult[], key: string): number {
+function handleSum(group: InsightResult[], key: string, sections: any[]): number {
 	let total = 0;
 	for (const insight of group) {
-		total = total + (insight[key] as number);
+		const section = getSection(sections, insight);
+		const mappedKey = mapping[key.split("_")[1]];
+		total = total + (section[mappedKey] as number);
 	}
 	return Number(total.toFixed(rounding));
 }
-function handleCount(group: InsightResult[], key: string): number {
+function handleCount(group: InsightResult[], key: string, sections: any[]): number {
 	const counted = new Set<string | number>();
 	let total = 0;
 	for (const insight of group) {
-		if (!counted.has(insight[key])) {
+		const section = getSection(sections, insight);
+		const mappedKey = mapping[key.split("_")[1]];
+		if (!counted.has(section[mappedKey])) {
 			total++;
-			counted.add(insight[key]);
+			counted.add(section[mappedKey]);
 		}
 	}
 	return total;
+}
+
+function getSection(sections: any[], insight: InsightResult): any {
+	return sections.find((element) => {
+		for (const entry of Object.entries(insight)) {
+			const updatedKey = mapping[entry[0].split("_")[1]];
+			if (element[updatedKey] !== entry[1]) {
+				return false;
+			}
+		}
+		if (!addedSections.has(element)) {
+			addedSections.add(element);
+			return true;
+		}
+		return false;
+	});
+}
+
+export async function validateApplyRecord(record: Record<string, string>, kind: InsightDatasetKind): Promise<boolean> {
+	if (Object.keys(record).length !== 1) {
+		throw new InsightError("Incorrect number of keys in Apply Record");
+	}
+	const token = Object.keys(record)[0];
+	if (!(token === "MAX" || token === "MIN" || token === "AVG" || token === "SUM" || token === "COUNT")) {
+		throw new InsightError("Apply token is not formatted correctly");
+	}
+	if (token === "MAX" || token === "MIN" || token === "AVG" || token === "SUM") {
+		if (!(await validateMKey(Object.values(record)[0], kind))) {
+			throw new InsightError("Key must be numeric");
+		}
+	}
+	const validateKey = await Promise.any([
+		validateSKey(Object.values(record)[0], kind),
+		validateMKey(Object.values(record)[0], kind),
+	]).catch(() => false);
+	if (!validateKey) {
+		throw new InsightError("Apply rule key not MKey or SKey");
+	}
+	return true;
 }

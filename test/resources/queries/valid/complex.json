@@ -41,18 +41,6 @@
 	"errorExpected": false,
 	"expected": [
 		{
-			"sections_dept": "chbe",
-			"sections_avg": 50,
-			"sections_pass": 7,
-			"sections_fail": 0,
-			"sections_audit": 0,
-			"sections_year": 2012,
-			"sections_id": "474",
-			"sections_uuid": "56484",
-			"sections_title": "proc ctrl eng",
-			"sections_instructor": ""
-		},
-		{
 			"sections_dept": "busi",
 			"sections_avg": 50,
 			"sections_pass": 3,
@@ -62,6 +50,18 @@
 			"sections_id": "441",
 			"sections_uuid": "11135",
 			"sections_title": "rl es manage i",
+			"sections_instructor": ""
+		},
+		{
+			"sections_dept": "chbe",
+			"sections_avg": 50,
+			"sections_pass": 7,
+			"sections_fail": 0,
+			"sections_audit": 0,
+			"sections_year": 2012,
+			"sections_id": "474",
+			"sections_uuid": "56484",
+			"sections_title": "proc ctrl eng",
 			"sections_instructor": ""
 		},
 		{

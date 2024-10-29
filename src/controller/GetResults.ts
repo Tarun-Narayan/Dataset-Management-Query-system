@@ -16,13 +16,13 @@ export async function getResults(query: Query): Promise<InsightResult[]> {
 
 	const objects = await getResultObject(query.OPTIONS, Array.from(sections));
 	if (query.TRANSFORMATIONS) {
-		return handleTransformations(query.TRANSFORMATIONS, objects);
+		return handleTransformations(query.TRANSFORMATIONS, objects, Array.from(sections));
 	}
 
 	return objects;
 }
 
-async function getDataset(
+export async function getDataset(
 	query: Query
 ): Promise<{ id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }> {
 	try {
@@ -158,7 +158,7 @@ async function handleMComparison(
 	}
 	const [MKey, input] = Object.entries(record)[0];
 	if (MKey.split("_")[0] !== dataset.id) {
-		throw new InsightError("Query references multiple datasets");
+		throw new InsightError("Query references multiple datasets1");
 	}
 
 	await Promise.all(
@@ -188,12 +188,12 @@ async function handleSComparison(
 	const id = SKey.split("_")[0];
 	const field = SKey.split("_")[1];
 	if (id !== dataset.id) {
-		throw new InsightError("Query references multiple datasets");
+		throw new InsightError("Query references multiple datasets2");
 	}
 
 	await Promise.all(
 		dataset.sections.map(async (section) => {
-			if (dataset.kind === InsightDatasetKind.Rooms) {
+			if (dataset.kind === InsightDatasetKind.Sections) {
 				if (await checkSSection(section, field, input)) {
 					sections.add(section);
 				}

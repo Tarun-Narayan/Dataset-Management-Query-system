@@ -13,6 +13,17 @@ const mapping: Record<string, string> = {
 	Pass: "pass",
 	Fail: "fail",
 	Audit: "audit",
+	lat: "lat",
+	lon: "lon",
+	seats: "seats",
+	fullname: "fullname",
+	shortname: "shortname",
+	number: "number",
+	name: "name",
+	address: "address",
+	type: "type",
+	furniture: "furniture",
+	href: "href",
 };
 
 // Map section keys to result keys
@@ -175,13 +186,17 @@ export async function getResultObject(options: Options, sections: any[]): Promis
 }
 
 function validKeys(keys: string[]): boolean {
-	const keyToParse = keys[0];
-	const validID = keyToParse.split("_")[0];
+	const keyToParse = keys.find((element) => element.includes("_"));
+	if (keyToParse) {
+		const validID = keyToParse.split("_")[0];
 
-	for (const key of keys) {
-		const toCompare = key.split("_")[0];
-		if (toCompare !== validID) {
-			return false;
+		for (const key of keys) {
+			if (key.includes("_")) {
+				const toCompare = key.split("_")[0];
+				if (toCompare !== validID) {
+					return false;
+				}
+			}
 		}
 	}
 	return true;
