@@ -303,6 +303,12 @@ describe("InsightFacade", function () {
 		it("[valid/empty_input.json] Test empty input to query", checkQuery);
 		it("[valid/empty_result.json] Test empty result to query", checkQuery);
 		it("[valid/transformation.json] Query using a complex transformation", checkQuery);
+		it("[valid/transformation_max.json] Query using a complex transformation MAX", checkQuery);
+		it("[valid/transformation_min.json] Query using a complex transformation MIN", checkQuery);
+		it("[valid/transformation_sum.json] Query using a complex transformation SUM", checkQuery);
+		it("[valid/transformation_count.json] Query using a complex transformation COUNT", checkQuery);
+		it("[valid/sort_down.json] Sort down", checkQuery);
+		it("[valid/sort_up.json] Sort up", checkQuery);
 		it("[valid/single_and.json] Query using AND logic with one filter", checkQuery);
 		it("[valid/single_or.json] Query using OR logic with one filter", checkQuery);
 

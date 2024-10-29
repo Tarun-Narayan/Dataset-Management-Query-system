@@ -1,0 +1,33 @@
+{
+	"title" : "Query using a complex transformation MIN",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"sections_avg": 97
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_title",
+				"sections_dept",
+				"minClasses"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"sections_title",
+				"sections_dept"
+			],
+			"APPLY": [
+				{
+					"minClasses": {
+						"MIN": "sections_avg"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{"sections_title":"career planning","sections_dept":"cnps","minClasses":97.47},{"sections_title":"thesis","sections_dept":"crwr","minClasses":98},{"sections_title":"res mthd in educ","sections_dept":"educ","minClasses":97.5},{"sections_title":"multimedia sys","sections_dept":"eece","minClasses":98.75},{"sections_title":"assess lrn diffi","sections_dept":"epse","minClasses":97.29},{"sections_title":"educ stds autism","sections_dept":"epse","minClasses":97.41},{"sections_title":"dev el sk df&hrd","sections_dept":"epse","minClasses":98.45},{"sections_title":"acad assess schl","sections_dept":"epse","minClasses":97.41},{"sections_title":"sem in autism","sections_dept":"epse","minClasses":97.69},{"sections_title":"cor des ed res","sections_dept":"epse","minClasses":97.09},{"sections_title":"coll&uni teachng","sections_dept":"epse","minClasses":97.67},{"sections_title":"diff geometry i","sections_dept":"math","minClasses":97.25},{"sections_title":"algb topology i","sections_dept":"math","minClasses":99.78},{"sections_title":"algb geometry i","sections_dept":"math","minClasses":97.48},{"sections_title":"harmonic anal i","sections_dept":"math","minClasses":97.09},{"sections_title":"cl pro prim care","sections_dept":"nurs","minClasses":98.21},{"sections_title":"fam nrs pract","sections_dept":"nurs","minClasses":97.53},{"sections_title":"eth&profl issues","sections_dept":"nurs","minClasses":97.33},{"sections_title":"work int health","sections_dept":"spph","minClasses":98.98}
+	]}
