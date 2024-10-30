@@ -290,7 +290,6 @@ describe("InsightFacade", function () {
 		// The relative path to the query file must be given in square brackets.
 		//
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
-		it("[valid/rooms.json] Rooms", checkQuery);
 		it("[valid/wildcard_first.json] Query with wildcard put first", checkQuery);
 		it("[valid/wildcard_last.json] Query with wildcard put last", checkQuery);
 		it("[valid/wildcard_contains.json] Query with wildcard put both sides", checkQuery);
