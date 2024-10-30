@@ -103,11 +103,11 @@ function handleRule(rule: ApplyRule, group: InsightResult[], sections: any[]): n
 }
 
 function handleAverage(group: InsightResult[], key: string, sections: any[]): number {
+	const mappedKey = mapping[key.split("_")[1]];
 	let total = new Decimal(0);
 	let numRows = 0;
 	for (const insight of group) {
 		const section = getSection(sections, insight);
-		const mappedKey = mapping[key.split("_")[1]];
 		const decimal = new Decimal(section[mappedKey] as number);
 		total = total.add(decimal);
 		numRows++;
@@ -116,42 +116,54 @@ function handleAverage(group: InsightResult[], key: string, sections: any[]): nu
 	return Number(avg.toFixed(rounding));
 }
 function handleMax(group: InsightResult[], key: string, sections: any[]): number {
-	let currentMax = group[0][key] as number;
+	const mappedKey = mapping[key.split("_")[1]];
+	const firstSection = getSection(sections, group[0]);
+	let currentMax = firstSection[mappedKey] as number;
+	let first = true;
 	for (const insight of group) {
-		const section = getSection(sections, insight);
-		const mappedKey = mapping[key.split("_")[1]];
-		if (section[mappedKey] > currentMax) {
-			currentMax = insight[key] as number;
+		if (!first) {
+			const section = getSection(sections, insight);
+			if (section[mappedKey] > currentMax) {
+				currentMax = section[mappedKey] as number;
+			}
+		} else {
+			first = false;
 		}
 	}
 	return currentMax;
 }
 function handleMin(group: InsightResult[], key: string, sections: any[]): number {
-	let currentMin = group[0][key] as number;
+	const mappedKey = mapping[key.split("_")[1]];
+	const firstSection = getSection(sections, group[0]);
+	let currentMin = firstSection[mappedKey] as number;
+	let first = true;
 	for (const insight of group) {
-		const section = getSection(sections, insight);
-		const mappedKey = mapping[key.split("_")[1]];
-		if (section[mappedKey] < currentMin) {
-			currentMin = insight[key] as number;
+		if (!first) {
+			const section = getSection(sections, insight);
+			if (section[mappedKey] < currentMin) {
+				currentMin = section[mappedKey] as number;
+			}
+		} else {
+			first = false;
 		}
 	}
 	return currentMin;
 }
 function handleSum(group: InsightResult[], key: string, sections: any[]): number {
+	const mappedKey = mapping[key.split("_")[1]];
 	let total = 0;
 	for (const insight of group) {
 		const section = getSection(sections, insight);
-		const mappedKey = mapping[key.split("_")[1]];
 		total = total + (section[mappedKey] as number);
 	}
 	return Number(total.toFixed(rounding));
 }
 function handleCount(group: InsightResult[], key: string, sections: any[]): number {
+	const mappedKey = mapping[key.split("_")[1]];
 	const counted = new Set<string | number>();
 	let total = 0;
 	for (const insight of group) {
 		const section = getSection(sections, insight);
-		const mappedKey = mapping[key.split("_")[1]];
 		if (!counted.has(section[mappedKey])) {
 			total++;
 			counted.add(section[mappedKey]);
