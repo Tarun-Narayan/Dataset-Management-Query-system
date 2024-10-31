@@ -65,6 +65,7 @@ export async function validateQuery(query: Query): Promise<boolean> {
 
 	const result1 = await validateBody(query.WHERE, kind);
 	const result2 = await validateOptions(query.OPTIONS, kind);
+	applyKeys.clear();
 
 	return result1 && result2 && result3;
 }

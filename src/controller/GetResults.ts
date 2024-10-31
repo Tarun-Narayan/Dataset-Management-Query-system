@@ -16,7 +16,7 @@ export async function getResults(query: Query): Promise<InsightResult[]> {
 
 	const objects = await getResultObject(query.OPTIONS, Array.from(sections));
 	if (query.TRANSFORMATIONS) {
-		return handleTransformations(query.TRANSFORMATIONS, objects, Array.from(sections));
+		return handleTransformations(query.TRANSFORMATIONS, objects, Array.from(sections), query.OPTIONS.COLUMNS);
 	}
 
 	return objects;

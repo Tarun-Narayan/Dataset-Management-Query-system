@@ -31,10 +31,11 @@ const addedSections = new Set<any>();
 export async function handleTransformations(
 	transforms: Transformations,
 	objects: InsightResult[],
-	sections: any[]
+	sections: any[],
+	columns: string[]
 ): Promise<InsightResult[]> {
 	const groupedResults = handleGroup(transforms.GROUP, objects);
-	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP, sections);
+	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP, sections, columns);
 }
 
 function handleGroup(group: string[], objects: InsightResult[]): Record<string, InsightResult[]> {
@@ -64,18 +65,21 @@ async function handleApply(
 	apply: ApplyRule[],
 	groups: Record<string, InsightResult[]>,
 	fields: string[],
-	sections: any[]
+	sections: any[],
+	columns: string[]
 ): Promise<InsightResult[]> {
 	const result = new Array<InsightResult>();
-	for (const rule of apply) {
-		for (const group of Object.values(groups)) {
-			const toAdd: InsightResult = {};
-			for (const field of fields) {
-				toAdd[field] = group[0][field];
-			}
-			toAdd[Object.keys(rule)[0]] = handleRule(rule, group, sections);
-			result.push(toAdd);
+	for (const group of Object.values(groups)) {
+		const toAdd: InsightResult = {};
+		for (const field of fields) {
+			toAdd[field] = group[0][field];
 		}
+		for (const rule of apply) {
+			if (columns.includes(Object.keys(rule)[0])) {
+				toAdd[Object.keys(rule)[0]] = handleRule(rule, group, sections);
+			}
+		}
+		result.push(toAdd);
 	}
 	return result;
 }
@@ -113,6 +117,7 @@ function handleAverage(group: InsightResult[], key: string, sections: any[]): nu
 		numRows++;
 	}
 	const avg = total.toNumber() / numRows;
+	addedSections.clear();
 	return Number(avg.toFixed(rounding));
 }
 function handleMax(group: InsightResult[], key: string, sections: any[]): number {
@@ -130,6 +135,7 @@ function handleMax(group: InsightResult[], key: string, sections: any[]): number
 			first = false;
 		}
 	}
+	addedSections.clear();
 	return currentMax;
 }
 function handleMin(group: InsightResult[], key: string, sections: any[]): number {
@@ -147,6 +153,7 @@ function handleMin(group: InsightResult[], key: string, sections: any[]): number
 			first = false;
 		}
 	}
+	addedSections.clear();
 	return currentMin;
 }
 function handleSum(group: InsightResult[], key: string, sections: any[]): number {
@@ -156,6 +163,7 @@ function handleSum(group: InsightResult[], key: string, sections: any[]): number
 		const section = getSection(sections, insight);
 		total = total + (section[mappedKey] as number);
 	}
+	addedSections.clear();
 	return Number(total.toFixed(rounding));
 }
 function handleCount(group: InsightResult[], key: string, sections: any[]): number {
@@ -169,6 +177,7 @@ function handleCount(group: InsightResult[], key: string, sections: any[]): numb
 			counted.add(section[mappedKey]);
 		}
 	}
+	addedSections.clear();
 	return total;
 }
 
