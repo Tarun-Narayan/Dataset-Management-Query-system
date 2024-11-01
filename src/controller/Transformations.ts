@@ -34,17 +34,20 @@ export async function handleTransformations(
 	sections: any[],
 	columns: string[]
 ): Promise<InsightResult[]> {
-	const groupedResults = handleGroup(transforms.GROUP, objects);
+	const groupedResults = handleGroup(transforms.GROUP, objects, sections);
+	addedSections.clear();
 	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP, sections, columns);
 }
 
-function handleGroup(group: string[], objects: InsightResult[]): Record<string, InsightResult[]> {
+function handleGroup(group: string[], objects: InsightResult[], sections: any[]): Record<string, InsightResult[]> {
 	const result: Record<string, InsightResult[]> = {};
 	const groupNames = new Set<string>();
 	for (const object of objects) {
+		const section = getSection(sections, object);
 		let groupName = "";
 		for (const key of group) {
-			const value = object[key].toString();
+			const mappedKey = mapping[key.split("_")[1]];
+			const value = String(section[mappedKey]);
 			groupName = groupName.concat(value, ", ");
 		}
 		const toErase = -2;
@@ -54,9 +57,7 @@ function handleGroup(group: string[], objects: InsightResult[]): Record<string, 
 			groupNames.add(groupName);
 			result[groupName] = new Array<InsightResult>();
 		}
-		const value = result[groupName];
-		value.push(object);
-		result[groupName] = value;
+		result[groupName].push(object);
 	}
 	return result;
 }
@@ -72,7 +73,9 @@ async function handleApply(
 	for (const group of Object.values(groups)) {
 		const toAdd: InsightResult = {};
 		for (const field of fields) {
-			toAdd[field] = group[0][field];
+			if (columns.includes(field)) {
+				toAdd[field] = group[0][field];
+			}
 		}
 		for (const rule of apply) {
 			if (columns.includes(Object.keys(rule)[0])) {
