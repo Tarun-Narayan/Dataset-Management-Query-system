@@ -33,7 +33,7 @@ function mapSectionToResult(section: any): any {
 	for (const key of Object.keys(section)) {
 		const mappedKey = mapping[key];
 		if (mappedKey) {
-				resultEntry[mappedKey] = section[key];
+			resultEntry[mappedKey] = section[key];
 		}
 	}
 
