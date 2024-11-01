@@ -125,6 +125,14 @@ export function processSections(fileMap: Map<string, any>): any[] {
 
 		for (const section of fileContent.result) {
 			if (isValidSection(section)) {
+				const idString = String(section.id);
+				const numYear = Number(section.Year);
+				section.id = idString;
+				if (section.Section === "overall") {
+					section.Year = 1900;
+				} else {
+					section.Year = numYear;
+				}
 				sections.push(section);
 			}
 		}

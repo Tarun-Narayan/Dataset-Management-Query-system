@@ -310,6 +310,7 @@ describe("InsightFacade", function () {
 		it("[valid/sort_up.json] Sort up", checkQuery);
 		it("[valid/single_and.json] Query using AND logic with one filter", checkQuery);
 		it("[valid/single_or.json] Query using OR logic with one filter", checkQuery);
+		it("[valid/transformation_all.json] Query with all group transform", checkQuery);
 		it("[valid/transformation_multiple.json] Query using multiple transformations", checkQuery);
 
 		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
