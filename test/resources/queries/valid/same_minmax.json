@@ -1,0 +1,36 @@
+{
+	"title" : "Same MIN MAX",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"sections_avg": 97
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_title",
+				"sections_dept"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"sections_title",
+				"sections_dept",
+				"sections_audit"
+			],
+			"APPLY": [
+				{
+					"maxFail": {
+						"MAX": "sections_fail"
+					}
+				},
+				{
+					"minFail": {
+						"MIN": "sections_fail"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [{"sections_title":"prpty,ident&uses","sections_dept":"wood","minClasses":1}]}

@@ -33,23 +33,7 @@ function mapSectionToResult(section: any): any {
 	for (const key of Object.keys(section)) {
 		const mappedKey = mapping[key];
 		if (mappedKey) {
-			// Set Year to 1900 if Section is "overall"
-			if (key === "Year") {
-				if (section.Section === "overall") {
-					resultEntry[mappedKey] = 1900;
-				} else {
-					const yearValue = section[key];
-					// Convert to number, year is string currently
-					resultEntry[mappedKey] = yearValue !== "" ? Number(yearValue) : undefined;
-				}
-			}
-			// Handle UUID to convert to a string
-			else if (key === "id") {
-				const uuidValue = section[key];
-				resultEntry[mappedKey] = uuidValue !== "" ? String(uuidValue) : undefined; // Convert to string, add quotes
-			} else {
 				resultEntry[mappedKey] = section[key];
-			}
 		}
 	}
 
