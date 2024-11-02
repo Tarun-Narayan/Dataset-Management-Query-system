@@ -313,6 +313,7 @@ describe("InsightFacade", function () {
 		it("[valid/single_or.json] Query using OR logic with one filter", checkQuery);
 		it("[valid/transformation_all.json] Query with all group transform", checkQuery);
 		it("[valid/transformation_multiple.json] Query using multiple transformations", checkQuery);
+		it("[valid/same_minmax.json] minmax", checkQuery);
 
 		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
 		it("[invalid/asterisk_middle.json] Query has asterisk in invalid spot", checkQuery);

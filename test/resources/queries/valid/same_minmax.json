@@ -1,0 +1,38 @@
+{
+	"title" : "Same MIN MAX",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"sections_avg": 97
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_title",
+				"sections_dept"
+			]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"sections_title",
+				"sections_dept",
+				"sections_audit"
+			],
+			"APPLY": [
+				{
+					"maxFail": {
+						"MAX": "sections_fail"
+					}
+				},
+				{
+					"minFail": {
+						"MIN": "sections_fail"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{"sections_title":"career planning","sections_dept":"cnps"},{"sections_title":"thesis","sections_dept":"crwr"},{"sections_title":"res mthd in educ","sections_dept":"educ"},{"sections_title":"multimedia sys","sections_dept":"eece"},{"sections_title":"assess lrn diffi","sections_dept":"epse"},{"sections_title":"educ stds autism","sections_dept":"epse"},{"sections_title":"dev el sk df&hrd","sections_dept":"epse"},{"sections_title":"acad assess schl","sections_dept":"epse"},{"sections_title":"sem in autism","sections_dept":"epse"},{"sections_title":"cor des ed res","sections_dept":"epse"},{"sections_title":"coll&uni teachng","sections_dept":"epse"},{"sections_title":"diff geometry i","sections_dept":"math"},{"sections_title":"algb topology i","sections_dept":"math"},{"sections_title":"algb geometry i","sections_dept":"math"},{"sections_title":"harmonic anal i","sections_dept":"math"},{"sections_title":"cl pro prim care","sections_dept":"nurs"},{"sections_title":"fam nrs pract","sections_dept":"nurs"},{"sections_title":"eth&profl issues","sections_dept":"nurs"},{"sections_title":"work int health","sections_dept":"spph"}
+	]}
