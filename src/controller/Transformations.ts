@@ -27,6 +27,7 @@ const mapping: Record<string, string> = {
 	href: "href",
 };
 const addedSections = new Set<any>();
+const overallYear = 1900;
 
 export async function handleTransformations(
 	transforms: Transformations,
@@ -47,6 +48,9 @@ function handleGroup(group: string[], objects: InsightResult[], sections: any[])
 		let groupName = "";
 		for (const key of group) {
 			const mappedKey = mapping[key.split("_")[1]];
+			if (mappedKey === "Year" && section.Section === "overall") {
+				section.Year = 1900;
+			}
 			const value = String(section[mappedKey]);
 			groupName = groupName.concat(value, ", ");
 		}
@@ -115,7 +119,15 @@ function handleAverage(group: InsightResult[], key: string, sections: any[]): nu
 	let numRows = 0;
 	for (const insight of group) {
 		const section = getSection(sections, insight);
-		const decimal = new Decimal(section[mappedKey] as number);
+		let value = section[mappedKey];
+		if (mappedKey === "Year") {
+			if (section.Section === "overall") {
+				value = overallYear;
+			} else {
+				value = Number(value);
+			}
+		}
+		const decimal = new Decimal(value as number);
 		total = total.add(decimal);
 		numRows++;
 	}
@@ -131,8 +143,16 @@ function handleMax(group: InsightResult[], key: string, sections: any[]): number
 	for (const insight of group) {
 		if (!first) {
 			const section = getSection(sections, insight);
-			if (section[mappedKey] > currentMax) {
-				currentMax = section[mappedKey] as number;
+			let value = section[mappedKey];
+			if (mappedKey === "Year") {
+				if (section.Section === "overall") {
+					value = overallYear;
+				} else {
+					value = Number(value);
+				}
+			}
+			if (value > currentMax) {
+				currentMax = value as number;
 			}
 		} else {
 			first = false;
@@ -149,8 +169,16 @@ function handleMin(group: InsightResult[], key: string, sections: any[]): number
 	for (const insight of group) {
 		if (!first) {
 			const section = getSection(sections, insight);
-			if (section[mappedKey] < currentMin) {
-				currentMin = section[mappedKey] as number;
+			let value = section[mappedKey];
+			if (mappedKey === "Year") {
+				if (section.Section === "overall") {
+					value = overallYear;
+				} else {
+					value = Number(value);
+				}
+			}
+			if (value < currentMin) {
+				currentMin = value as number;
 			}
 		} else {
 			first = false;
@@ -164,7 +192,15 @@ function handleSum(group: InsightResult[], key: string, sections: any[]): number
 	let total = 0;
 	for (const insight of group) {
 		const section = getSection(sections, insight);
-		total = total + (section[mappedKey] as number);
+		let value = section[mappedKey];
+		if (mappedKey === "Year") {
+			if (section.Section === "overall") {
+				value = overallYear;
+			} else {
+				value = Number(value);
+			}
+		}
+		total = total + (value as number);
 	}
 	addedSections.clear();
 	return Number(total.toFixed(rounding));
@@ -175,9 +211,20 @@ function handleCount(group: InsightResult[], key: string, sections: any[]): numb
 	let total = 0;
 	for (const insight of group) {
 		const section = getSection(sections, insight);
-		if (!counted.has(section[mappedKey])) {
+		let value = section[mappedKey];
+		if (mappedKey === "Year") {
+			if (section.Section === "overall") {
+				value = overallYear;
+			} else {
+				value = Number(value);
+			}
+		}
+		if (mappedKey === "id") {
+			value = String(value);
+		}
+		if (!counted.has(value)) {
 			total++;
-			counted.add(section[mappedKey]);
+			counted.add(value);
 		}
 	}
 	addedSections.clear();
@@ -188,7 +235,18 @@ function getSection(sections: any[], insight: InsightResult): any {
 	return sections.find((element) => {
 		for (const entry of Object.entries(insight)) {
 			const updatedKey = mapping[entry[0].split("_")[1]];
-			if (element[updatedKey] !== entry[1]) {
+			let value = element[updatedKey];
+			if (updatedKey === "Year") {
+				if (element.Section === "overall") {
+					value = overallYear;
+				} else {
+					value = Number(value);
+				}
+			}
+			if (updatedKey === "id") {
+				value = String(value);
+			}
+			if (value !== entry[1]) {
 				return false;
 			}
 		}
