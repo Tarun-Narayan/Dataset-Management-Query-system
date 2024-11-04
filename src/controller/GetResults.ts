@@ -1,8 +1,8 @@
 import { InsightDatasetKind, InsightError, InsightResult, ResultTooLargeError } from "./IInsightFacade";
 import path from "path";
 import * as fs from "fs-extra";
-import { Filter, LogicComparison, MComparison, Negation, Query, SComparison } from "./Query";
-import { getResultObject } from "./GetResultObject";
+import { Filter, LogicComparison, MComparison, Negation, Order, Query, SComparison } from "./Query";
+import { getResultObject, orderResults, orderResultsSingle, resultsMap } from "./GetResultObject";
 import { handleTransformations } from "./Transformations";
 
 const MAX_SIZE = 5000;
@@ -14,11 +14,20 @@ export async function getResults(query: Query): Promise<InsightResult[]> {
 		throw new ResultTooLargeError(`Query Result size exceeded: ` + `${MAX_SIZE}`);
 	}
 
-	const objects = await getResultObject(query.OPTIONS, Array.from(sections));
+	let objects = await getResultObject(query.OPTIONS, Array.from(sections));
 	if (query.TRANSFORMATIONS) {
-		return handleTransformations(query.TRANSFORMATIONS, objects, Array.from(sections), query.OPTIONS.COLUMNS);
+		objects = await handleTransformations(query.TRANSFORMATIONS, query.OPTIONS.COLUMNS);
+		if (typeof query.OPTIONS.ORDER === "string") {
+			const orderKey = query.OPTIONS.ORDER; // The column name to order by
+			objects = orderResultsSingle(objects, orderKey); // Use the helper function to order results
+		} else if (query.OPTIONS.ORDER) {
+			const orderKeys = (query.OPTIONS.ORDER as Order).keys;
+			const dir = (query.OPTIONS.ORDER as Order).dir;
+			objects = orderResults(objects, orderKeys, dir);
+		}
 	}
 
+	resultsMap.clear();
 	return objects;
 }
 
