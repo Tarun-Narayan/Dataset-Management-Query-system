@@ -2,6 +2,7 @@ import { InsightError, InsightResult } from "./IInsightFacade";
 import { Options, Order } from "./Query";
 
 // Data file to dataset mapping.
+export const resultsMap = new Map<InsightResult, any>();
 const mapping: Record<string, string> = {
 	id: "uuid",
 	Course: "id",
@@ -52,7 +53,7 @@ function mapSectionToResult(section: any): any {
 			}
 		}
 	}
-
+	resultsMap.set(resultEntry, section);
 	return resultEntry;
 }
 
@@ -79,7 +80,7 @@ function filterResultKeys(resultEntry: any, columns: string[]): any {
 }
 
 // Order results based on the specified key
-function orderResultsSingle(results: InsightResult[], orderKey: string): InsightResult[] {
+export function orderResultsSingle(results: InsightResult[], orderKey: string): InsightResult[] {
 	return results.sort((a, b) => {
 		const aValue = a[orderKey];
 		const bValue = b[orderKey];
@@ -120,7 +121,7 @@ function orderStringResult(aString: string, bString: string, dir: string): numbe
 	return 0;
 }
 
-function orderResults(results: InsightResult[], orderKeys: string[], dir: string): InsightResult[] {
+export function orderResults(results: InsightResult[], orderKeys: string[], dir: string): InsightResult[] {
 	return results.sort((a, b) => {
 		for (const key of orderKeys) {
 			const aValue = a[key];

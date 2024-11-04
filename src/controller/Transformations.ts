@@ -1,6 +1,7 @@
 import { ApplyRule, Transformations, validateMKey, validateSKey } from "./Query";
 import { InsightDatasetKind, InsightError, InsightResult } from "./IInsightFacade";
 import Decimal from "decimal.js";
+import { resultsMap } from "./GetResultObject";
 
 const rounding = 2;
 const mapping: Record<string, string> = {
@@ -29,22 +30,18 @@ const mapping: Record<string, string> = {
 const addedSections = new Set<any>();
 const overallYear = 1900;
 
-export async function handleTransformations(
-	transforms: Transformations,
-	objects: InsightResult[],
-	sections: any[],
-	columns: string[]
-): Promise<InsightResult[]> {
-	const groupedResults = handleGroup(transforms.GROUP, objects, sections);
+export async function handleTransformations(transforms: Transformations, columns: string[]): Promise<InsightResult[]> {
+	const groupedResults = handleGroup(transforms.GROUP);
 	addedSections.clear();
-	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP, sections, columns);
+	return await handleApply(transforms.APPLY, groupedResults, transforms.GROUP, columns);
 }
 
-function handleGroup(group: string[], objects: InsightResult[], sections: any[]): Record<string, InsightResult[]> {
+function handleGroup(group: string[]): Record<string, InsightResult[]> {
 	const result: Record<string, InsightResult[]> = {};
 	const groupNames = new Set<string>();
-	for (const object of objects) {
-		const section = getSection(sections, object);
+	const insights: IterableIterator<InsightResult> = resultsMap.keys();
+	for (const object of insights) {
+		const section = resultsMap.get(object);
 		let groupName = "";
 		for (const key of group) {
 			const mappedKey = mapping[key.split("_")[1]];
@@ -70,20 +67,20 @@ async function handleApply(
 	apply: ApplyRule[],
 	groups: Record<string, InsightResult[]>,
 	fields: string[],
-	sections: any[],
 	columns: string[]
 ): Promise<InsightResult[]> {
 	const result = new Array<InsightResult>();
 	for (const group of Object.values(groups)) {
 		const toAdd: InsightResult = {};
 		for (const field of fields) {
+			const key = field.split("_")[1];
 			if (columns.includes(field)) {
-				toAdd[field] = group[0][field];
+				toAdd[field] = group[0][key];
 			}
 		}
 		for (const rule of apply) {
 			if (columns.includes(Object.keys(rule)[0])) {
-				toAdd[Object.keys(rule)[0]] = handleRule(rule, group, sections);
+				toAdd[Object.keys(rule)[0]] = handleRule(rule, group);
 			}
 		}
 		result.push(toAdd);
@@ -91,34 +88,34 @@ async function handleApply(
 	return result;
 }
 
-function handleRule(rule: ApplyRule, group: InsightResult[], sections: any[]): number {
+function handleRule(rule: ApplyRule, group: InsightResult[]): number {
 	const token = Object.keys(Object.values(rule)[0])[0];
 	const key = Object.values(Object.values(rule)[0])[0];
 	let result = 0;
 	if (token === "AVG") {
-		result = handleAverage(group, key, sections);
+		result = handleAverage(group, key);
 	}
 	if (token === "MAX") {
-		result = handleMax(group, key, sections);
+		result = handleMax(group, key);
 	}
 	if (token === "MIN") {
-		result = handleMin(group, key, sections);
+		result = handleMin(group, key);
 	}
 	if (token === "SUM") {
-		result = handleSum(group, key, sections);
+		result = handleSum(group, key);
 	}
 	if (token === "COUNT") {
-		result = handleCount(group, key, sections);
+		result = handleCount(group, key);
 	}
 	return result;
 }
 
-function handleAverage(group: InsightResult[], key: string, sections: any[]): number {
+function handleAverage(group: InsightResult[], key: string): number {
 	const mappedKey = mapping[key.split("_")[1]];
 	let total = new Decimal(0);
 	let numRows = 0;
 	for (const insight of group) {
-		const section = getSection(sections, insight);
+		const section = resultsMap.get(insight);
 		let value = section[mappedKey];
 		if (mappedKey === "Year") {
 			if (section.Section === "overall") {
@@ -135,14 +132,14 @@ function handleAverage(group: InsightResult[], key: string, sections: any[]): nu
 	addedSections.clear();
 	return Number(avg.toFixed(rounding));
 }
-function handleMax(group: InsightResult[], key: string, sections: any[]): number {
+function handleMax(group: InsightResult[], key: string): number {
 	const mappedKey = mapping[key.split("_")[1]];
-	const firstSection = getSection(sections, group[0]);
+	const firstSection = resultsMap.get(group[0]);
 	let currentMax = firstSection[mappedKey] as number;
 	let first = true;
 	for (const insight of group) {
 		if (!first) {
-			const section = getSection(sections, insight);
+			const section = resultsMap.get(insight);
 			let value = section[mappedKey];
 			if (mappedKey === "Year") {
 				if (section.Section === "overall") {
@@ -161,14 +158,14 @@ function handleMax(group: InsightResult[], key: string, sections: any[]): number
 	addedSections.clear();
 	return currentMax;
 }
-function handleMin(group: InsightResult[], key: string, sections: any[]): number {
+function handleMin(group: InsightResult[], key: string): number {
 	const mappedKey = mapping[key.split("_")[1]];
-	const firstSection = getSection(sections, group[0]);
+	const firstSection = resultsMap.get(group[0]);
 	let currentMin = firstSection[mappedKey] as number;
 	let first = true;
 	for (const insight of group) {
 		if (!first) {
-			const section = getSection(sections, insight);
+			const section = resultsMap.get(insight);
 			let value = section[mappedKey];
 			if (mappedKey === "Year") {
 				if (section.Section === "overall") {
@@ -187,11 +184,11 @@ function handleMin(group: InsightResult[], key: string, sections: any[]): number
 	addedSections.clear();
 	return currentMin;
 }
-function handleSum(group: InsightResult[], key: string, sections: any[]): number {
+function handleSum(group: InsightResult[], key: string): number {
 	const mappedKey = mapping[key.split("_")[1]];
 	let total = 0;
 	for (const insight of group) {
-		const section = getSection(sections, insight);
+		const section = resultsMap.get(insight);
 		let value = section[mappedKey];
 		if (mappedKey === "Year") {
 			if (section.Section === "overall") {
@@ -205,12 +202,12 @@ function handleSum(group: InsightResult[], key: string, sections: any[]): number
 	addedSections.clear();
 	return Number(total.toFixed(rounding));
 }
-function handleCount(group: InsightResult[], key: string, sections: any[]): number {
+function handleCount(group: InsightResult[], key: string): number {
 	const mappedKey = mapping[key.split("_")[1]];
 	const counted = new Set<string | number>();
 	let total = 0;
 	for (const insight of group) {
-		const section = getSection(sections, insight);
+		const section = resultsMap.get(insight);
 		let value = section[mappedKey];
 		if (mappedKey === "Year") {
 			if (section.Section === "overall") {
@@ -230,7 +227,7 @@ function handleCount(group: InsightResult[], key: string, sections: any[]): numb
 	addedSections.clear();
 	return total;
 }
-
+/* Caused timeout???
 function getSection(sections: any[], insight: InsightResult): any {
 	return sections.find((element) => {
 		for (const entry of Object.entries(insight)) {
@@ -257,6 +254,8 @@ function getSection(sections: any[], insight: InsightResult): any {
 		return false;
 	});
 }
+
+ */
 
 export async function validateApplyRecord(record: Record<string, string>, kind: InsightDatasetKind): Promise<boolean> {
 	if (Object.keys(record).length !== 1) {
