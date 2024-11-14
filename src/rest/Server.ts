@@ -1,18 +1,23 @@
 import express, { Application, Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
+import { StatusCodes } from "http-status-codes/build/cjs/status-codes";
 import Log from "@ubccpsc310/folder-test/build/Log";
 import * as http from "http";
 import cors from "cors";
+import InsightFacade from "../controller/InsightFacade";
+import { InsightDatasetKind } from "../controller/IInsightFacade";
+import { getContentFromArchives } from "../../test/TestUtil";
 
 export default class Server {
 	private readonly port: number;
 	private express: Application;
 	private server: http.Server | undefined;
+	private static facade: InsightFacade;
 
 	constructor(port: number) {
 		Log.info(`Server::<init>( ${port} )`);
 		this.port = port;
 		this.express = express();
+		Server.facade = new InsightFacade();
 
 		this.registerMiddleware();
 		this.registerRoutes();
@@ -25,7 +30,7 @@ export default class Server {
 
 	/**
 	 * Starts the server. Returns a promise that resolves if success. Promises are used
-	 * here because starting the server takes some time and we want to know when it
+	 * here because starting the server takes some time, and we want to know when it
 	 * is done (and if it worked).
 	 *
 	 * @returns {Promise<void>}
@@ -52,7 +57,7 @@ export default class Server {
 	}
 
 	/**
-	 * Stops the server. Again returns a promise so we know when the connections have
+	 * Stops the server. Again returns a promise, so we know when the connections have
 	 * actually been fully closed and the port has been released.
 	 *
 	 * @returns {Promise<void>}
@@ -74,7 +79,7 @@ export default class Server {
 
 	// Registers middleware to parse request before passing them to request handlers
 	private registerMiddleware(): void {
-		// JSON parser must be place before raw parser because of wildcard matching done by raw parser below
+		// JSON parser must be in place before raw parser because of wildcard matching done by raw parser below
 		this.express.use(express.json());
 		this.express.use(express.raw({ type: "application/*", limit: "10mb" }));
 
@@ -89,6 +94,8 @@ export default class Server {
 		this.express.get("/echo/:msg", Server.echo);
 
 		// TODO: your other endpoints should go here
+		this.express.put("/dataset/:id/:kind", Server.add);
+		this.express.get("/datasets", Server.list);
 	}
 
 	// The next two methods handle the echo service.
@@ -110,5 +117,46 @@ export default class Server {
 		} else {
 			return "Message not provided";
 		}
+	}
+
+	private static async add(req: Request, res: Response): Promise<void> {
+		try {
+			// parse fields
+			const id = req.params.id;
+			const kindString = req.params.kind.toLowerCase();
+			const content = await getContentFromArchives(req.body.toString());
+
+			// retrieve result
+			let result: string[];
+			if (kindString === "rooms") {
+				result = await Server.facade.addDataset(id, content, InsightDatasetKind.Rooms);
+			} else if (kindString === "sections") {
+				result = await Server.facade.addDataset(id, content, InsightDatasetKind.Sections);
+			} else {
+				// return error for invalid kind
+				Log.error("Inputted kind type does not exist");
+				res.status(StatusCodes.BAD_REQUEST).json({ error: "Inputted kind type does not exist" });
+				return Promise.resolve();
+			}
+
+			// return valid result
+			Log.info("Dataset: '" + id + "' has been successfully added");
+			res.status(StatusCodes.OK).json({ result: result });
+			return Promise.resolve();
+		} catch (err) {
+			// return all other errors
+			Log.error(err);
+			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+			return Promise.reject();
+		}
+	}
+
+	private static async list(res: Response): Promise<void> {
+		const result = await this.facade.listDatasets();
+		res.status(StatusCodes.OK).json({ result: result });
+	}
+
+	public getServer(): http.Server | undefined {
+		return this.server;
 	}
 }
