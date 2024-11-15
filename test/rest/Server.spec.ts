@@ -5,11 +5,13 @@ import Log from "@ubccpsc310/folder-test/build/Log";
 import Server from "../../src/rest/Server";
 import { clearDisk } from "../TestUtil";
 
+const portNumber = 4321;
+
 describe("Facade C3", function () {
 	let server: Server;
 
 	before(async function () {
-		server = new Server(0);
+		server = new Server(portNumber);
 		await server.start();
 		await clearDisk();
 	});
@@ -21,7 +23,7 @@ describe("Facade C3", function () {
 	describe("PUT", function () {
 		// Sample on how to format PUT requests
 		it("PUT test for adding one Sections dataset", async function () {
-			const SERVER_URL = "http://localhost:0";
+			const SERVER_URL = "http://localhost:4321";
 			const ENDPOINT_URL = "/dataset/ubc/sections";
 			const ZIP_FILE_DATA = Buffer.from("pair.zip");
 
@@ -48,7 +50,7 @@ describe("Facade C3", function () {
 
 	describe("POST", function () {
 		it("POST test for querying a dataset", async function () {
-			const SERVER_URL = server.getServer();
+			const SERVER_URL = "http://localhost:4321";
 			const ENDPOINT_URL = "/query";
 			const QUERY = {
 				WHERE: {
@@ -110,7 +112,7 @@ describe("Facade C3", function () {
 
 	describe("DELETE", function () {
 		it("DELETE test for removing a dataset", async function () {
-			const SERVER_URL = server.getServer();
+			const SERVER_URL = "http://localhost:4321";
 			const ENDPOINT_URL = "/dataset/ubc";
 
 			try {
@@ -132,7 +134,7 @@ describe("Facade C3", function () {
 
 	describe("GET", function () {
 		it("GET test for listing datasets", async function () {
-			const SERVER_URL = server.getServer();
+			const SERVER_URL = "http://localhost:4321";
 			const ENDPOINT_URL = "/datasets";
 
 			try {

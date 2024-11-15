@@ -6,7 +6,12 @@ import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
 
 import { InsightDatasetKind, InsightError, NotFoundError } from "../controller/IInsightFacade";
-import { getContentFromArchives } from "../../test/TestUtil";
+import * as fs from "fs-extra";
+
+const kindMap: Record<string, InsightDatasetKind> = {
+	sections: InsightDatasetKind.Sections,
+	rooms: InsightDatasetKind.Rooms,
+};
 
 export default class Server {
 	private readonly port: number;
@@ -102,30 +107,24 @@ export default class Server {
 
 	private static async add(req: Request, res: Response): Promise<void> {
 		try {
-			console.log(0);
 			// parse fields
 			const id = req.params.id;
-			console.log(id);
 			const kindString = req.params.kind.toLowerCase();
-			console.log(kindString);
-			const content = await getContentFromArchives(req.body.toString());
+			const kind = kindMap[kindString];
+			const buffer = await fs.readFile("test/resources/archives/" + req.body.toString());
+			const content = buffer.toString("base64");
 
 			// retrieve result
-			let result: string[];
-			if (kindString === "rooms") {
-				result = await Server.facade.addDataset(id, content, InsightDatasetKind.Rooms);
-			} else if (kindString === "sections") {
-				result = await Server.facade.addDataset(id, content, InsightDatasetKind.Sections);
+			if (kind) {
+				// return valid result
+				const result = await Server.facade.addDataset(id, content, kind);
+				Log.info("Dataset: '" + id + "' has been successfully added");
+				res.status(StatusCodes.OK).json({ result: result });
 			} else {
 				// return error for invalid kind
 				Log.error("Inputted kind type does not exist");
 				res.status(StatusCodes.BAD_REQUEST).json({ error: "Inputted kind type does not exist" });
-				return;
 			}
-
-			// return valid result
-			Log.info("Dataset: '" + id + "' has been successfully added");
-			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
 			// return all other errors
 			Log.error(err);
@@ -195,5 +194,4 @@ export default class Server {
 			return "Message not provided";
 		}
 	}
-
 }
