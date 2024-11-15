@@ -9,7 +9,6 @@ require("supertest");
 describe("Facade C3", function () {
 	let server: Server;
 
-
 	before(async function () {
 		server = new Server(0);
 		await server.start();

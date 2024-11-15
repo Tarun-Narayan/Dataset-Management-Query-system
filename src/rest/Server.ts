@@ -153,7 +153,6 @@ export default class Server {
 		}
 	}
 
-
 	private static async performQ(req: Request, res: Response): Promise<void> {
 		try {
 			const query = req.body;
@@ -173,7 +172,6 @@ export default class Server {
 			Log.error(`Error listing datasets: ${err}`);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 		}
-
 	}
 
 	// The next two methods handle the echo service.
