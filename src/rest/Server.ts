@@ -1,9 +1,10 @@
 import express, { Application, Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
+import { StatusCodes } from "http-status-codes/build/cjs/status-codes";
 import Log from "@ubccpsc310/folder-test/build/Log";
 import * as http from "http";
 import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
+
 import { InsightDatasetKind, InsightError, NotFoundError } from "../controller/IInsightFacade";
 import { getContentFromArchives } from "../../test/TestUtil";
 
@@ -12,10 +13,12 @@ export default class Server {
 	private express: Application;
 	private server: http.Server | undefined;
 	private static facade: InsightFacade;
+
 	constructor(port: number) {
 		Log.info(`Server::<init>( ${port} )`);
 		this.port = port;
 		this.express = express();
+		Server.facade = new InsightFacade();
 
 		this.registerMiddleware();
 		this.registerRoutes();
@@ -29,7 +32,7 @@ export default class Server {
 
 	/**
 	 * Starts the server. Returns a promise that resolves if success. Promises are used
-	 * here because starting the server takes some time and we want to know when it
+	 * here because starting the server takes some time, and we want to know when it
 	 * is done (and if it worked).
 	 *
 	 * @returns {Promise<void>}
@@ -56,7 +59,7 @@ export default class Server {
 	}
 
 	/**
-	 * Stops the server. Again returns a promise so we know when the connections have
+	 * Stops the server. Again returns a promise, so we know when the connections have
 	 * actually been fully closed and the port has been released.
 	 *
 	 * @returns {Promise<void>}
@@ -78,7 +81,7 @@ export default class Server {
 
 	// Registers middleware to parse request before passing them to request handlers
 	private registerMiddleware(): void {
-		// JSON parser must be place before raw parser because of wildcard matching done by raw parser below
+		// JSON parser must be in place before raw parser because of wildcard matching done by raw parser below
 		this.express.use(express.json());
 		this.express.use(express.raw({ type: "application/*", limit: "10mb" }));
 
@@ -150,6 +153,7 @@ export default class Server {
 		}
 	}
 
+
 	private static async performQ(req: Request, res: Response): Promise<void> {
 		try {
 			const query = req.body;
@@ -169,6 +173,7 @@ export default class Server {
 			Log.error(`Error listing datasets: ${err}`);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 		}
+
 	}
 
 	// The next two methods handle the echo service.
@@ -191,6 +196,7 @@ export default class Server {
 			return "Message not provided";
 		}
 	}
+
 	public getServer(): http.Server | undefined {
 		return this.server;
 	}
