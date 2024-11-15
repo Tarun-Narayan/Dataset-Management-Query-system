@@ -4,7 +4,6 @@ import { StatusCodes } from "http-status-codes/build/cjs/status-codes";
 import Log from "@ubccpsc310/folder-test/build/Log";
 import Server from "../../src/rest/Server";
 import { clearDisk } from "../TestUtil";
-require("supertest");
 
 describe("Facade C3", function () {
 	let server: Server;
@@ -22,7 +21,7 @@ describe("Facade C3", function () {
 	describe("PUT", function () {
 		// Sample on how to format PUT requests
 		it("PUT test for adding one Sections dataset", async function () {
-			const SERVER_URL = server.getServer();
+			const SERVER_URL = "http://localhost:0";
 			const ENDPOINT_URL = "/dataset/ubc/sections";
 			const ZIP_FILE_DATA = Buffer.from("pair.zip");
 

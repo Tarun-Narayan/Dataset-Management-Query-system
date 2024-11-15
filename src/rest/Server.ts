@@ -121,9 +121,12 @@ export default class Server {
 
 	private static async add(req: Request, res: Response): Promise<void> {
 		try {
+			console.log(0);
 			// parse fields
 			const id = req.params.id;
+			console.log(id);
 			const kindString = req.params.kind.toLowerCase();
+			console.log(kindString);
 			const content = await getContentFromArchives(req.body.toString());
 
 			// retrieve result
@@ -136,18 +139,16 @@ export default class Server {
 				// return error for invalid kind
 				Log.error("Inputted kind type does not exist");
 				res.status(StatusCodes.BAD_REQUEST).json({ error: "Inputted kind type does not exist" });
-				return Promise.resolve();
+				return;
 			}
 
 			// return valid result
 			Log.info("Dataset: '" + id + "' has been successfully added");
 			res.status(StatusCodes.OK).json({ result: result });
-			return Promise.resolve();
 		} catch (err) {
 			// return all other errors
 			Log.error(err);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
-			return Promise.reject();
 		}
 	}
 
@@ -156,7 +157,4 @@ export default class Server {
 		res.status(StatusCodes.OK).json({ result: result });
 	}
 
-	public getServer(): http.Server | undefined {
-		return this.server;
-	}
 }
