@@ -4,7 +4,8 @@ import Log from "@ubccpsc310/folder-test/build/Log";
 import * as http from "http";
 import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
-import { InsightDatasetKind } from "../controller/IInsightFacade";
+
+import { InsightDatasetKind, InsightError, NotFoundError } from "../controller/IInsightFacade";
 import { getContentFromArchives } from "../../test/TestUtil";
 
 export default class Server {
@@ -21,6 +22,7 @@ export default class Server {
 
 		this.registerMiddleware();
 		this.registerRoutes();
+		Server.facade = new InsightFacade();
 
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
@@ -92,31 +94,10 @@ export default class Server {
 		// This is an example endpoint this you can invoke by accessing this URL in your browser:
 		// http://localhost:4321/echo/hello
 		this.express.get("/echo/:msg", Server.echo);
-
-		// TODO: your other endpoints should go here
 		this.express.put("/dataset/:id/:kind", Server.add);
+		this.express.delete("/dataset/:id", Server.remove);
+		this.express.post("/query", Server.performQ);
 		this.express.get("/datasets", Server.list);
-	}
-
-	// The next two methods handle the echo service.
-	// These are almost certainly not the best place to put these, but are here for your reference.
-	// By updating the Server.echo function pointer above, these methods can be easily moved.
-	private static echo(req: Request, res: Response): void {
-		try {
-			Log.info(`Server::echo(..) - params: ${JSON.stringify(req.params)}`);
-			const response = Server.performEcho(req.params.msg);
-			res.status(StatusCodes.OK).json({ result: response });
-		} catch (err) {
-			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
-		}
-	}
-
-	private static performEcho(msg: string): string {
-		if (typeof msg !== "undefined" && msg !== null) {
-			return `${msg}...${msg}`;
-		} else {
-			return "Message not provided";
-		}
 	}
 
 	private static async add(req: Request, res: Response): Promise<void> {
@@ -151,9 +132,67 @@ export default class Server {
 		}
 	}
 
-	private static async list(res: Response): Promise<void> {
-		const result = await this.facade.listDatasets();
-		res.status(StatusCodes.OK).json({ result: result });
+	private static async remove(req: Request, res: Response): Promise<void> {
+		try {
+			const id = req.params.id;
+			const result = await Server.facade.removeDataset(id);
+			Log.info(`Dataset: '${id}' has been successfully removed`);
+			res.status(StatusCodes.OK).json({ result: result });
+		} catch (err) {
+			const id = req.params.id;
+			if (err instanceof NotFoundError) {
+				Log.error(`Dataset: '${id}' not found`);
+				res.status(StatusCodes.NOT_FOUND).json({ error: err });
+			} else if (err instanceof InsightError) {
+				Log.error(`Error removing dataset: ${err}`);
+				res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+			} else {
+				Log.error(`Unexpected error: ${err}`);
+				res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+			}
+		}
+	}
+
+	private static async performQ(req: Request, res: Response): Promise<void> {
+		try {
+			const query = req.body;
+			const result = await Server.facade.performQuery(query);
+			res.status(StatusCodes.OK).json({ result: result });
+		} catch (err) {
+			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+		}
+	}
+
+	private static async list(_req: Request, res: Response): Promise<void> {
+		try {
+			const result = await Server.facade.listDatasets();
+			Log.info("List of datasets retrieved successfully");
+			res.status(StatusCodes.OK).json({ result: result });
+		} catch (err) {
+			Log.error(`Error listing datasets: ${err}`);
+			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+		}
+	}
+
+	// The next two methods handle the echo service.
+	// These are almost certainly not the best place to put these, but are here for your reference.
+	// By updating the Server.echo function pointer above, these methods can be easily moved.
+	private static echo(req: Request, res: Response): void {
+		try {
+			Log.info(`Server::echo(..) - params: ${JSON.stringify(req.params)}`);
+			const response = Server.performEcho(req.params.msg);
+			res.status(StatusCodes.OK).json({ result: response });
+		} catch (err) {
+			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+		}
+	}
+
+	private static performEcho(msg: string): string {
+		if (typeof msg !== "undefined" && msg !== null) {
+			return `${msg}...${msg}`;
+		} else {
+			return "Message not provided";
+		}
 	}
 
 	public getServer(): http.Server | undefined {
