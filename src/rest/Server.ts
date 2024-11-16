@@ -127,7 +127,7 @@ export default class Server {
 			}
 		} catch (err) {
 			// return all other errors
-			Log.error(err);
+			Log.error(`${err}`);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 		}
 	}
