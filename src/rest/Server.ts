@@ -6,7 +6,12 @@ import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
 
 import { InsightDatasetKind, InsightError, NotFoundError } from "../controller/IInsightFacade";
-import { getContentFromArchives } from "../../test/TestUtil";
+import * as fs from "fs-extra";
+
+const kindMap: Record<string, InsightDatasetKind> = {
+	sections: InsightDatasetKind.Sections,
+	rooms: InsightDatasetKind.Rooms,
+};
 
 export default class Server {
 	private readonly port: number;
@@ -105,30 +110,25 @@ export default class Server {
 			// parse fields
 			const id = req.params.id;
 			const kindString = req.params.kind.toLowerCase();
-			const content = await getContentFromArchives(req.body.toString());
+			const kind = kindMap[kindString];
+			const buffer = await fs.readFile("test/resources/archives/" + req.body.toString());
+			const content = buffer.toString("base64");
 
 			// retrieve result
-			let result: string[];
-			if (kindString === "rooms") {
-				result = await Server.facade.addDataset(id, content, InsightDatasetKind.Rooms);
-			} else if (kindString === "sections") {
-				result = await Server.facade.addDataset(id, content, InsightDatasetKind.Sections);
+			if (kind) {
+				// return valid result
+				const result = await Server.facade.addDataset(id, content, kind);
+				Log.info("Dataset: '" + id + "' has been successfully added");
+				res.status(StatusCodes.OK).json({ result: result });
 			} else {
 				// return error for invalid kind
 				Log.error("Inputted kind type does not exist");
 				res.status(StatusCodes.BAD_REQUEST).json({ error: "Inputted kind type does not exist" });
-				return Promise.resolve();
 			}
-
-			// return valid result
-			Log.info("Dataset: '" + id + "' has been successfully added");
-			res.status(StatusCodes.OK).json({ result: result });
-			return Promise.resolve();
 		} catch (err) {
 			// return all other errors
 			Log.error(err);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
-			return Promise.reject();
 		}
 	}
 
@@ -193,9 +193,5 @@ export default class Server {
 		} else {
 			return "Message not provided";
 		}
-	}
-
-	public getServer(): http.Server | undefined {
-		return this.server;
 	}
 }
