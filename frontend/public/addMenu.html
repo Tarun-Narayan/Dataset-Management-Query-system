@@ -2,11 +2,23 @@
 <html lang="">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-	<title>310 Frontend</title>
+	<title>Add Menu</title>
 	<link href="/style.css" rel="stylesheet"/>
 </head>
 <body>
-<button id="choose-button" class="button">Choose file</button>
+<form>
+	<label for="enterID">Enter dataset name:</label>
+	<input type="text" id="enterID" name="enterID">
+	<br>
+	<br>
+
+	<label for="chooseFile">Select file for dataset:</label>
+	<input type="file" id="chooseFile" name="chooseFile">
+	<br>
+	<br>
+
+	<input type="submit" value="Add Dataset">
+</form>
 
 <script type="text/javascript" src="/frontend.js"></script>
 </body>
