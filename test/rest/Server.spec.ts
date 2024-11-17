@@ -18,6 +18,7 @@ describe("Facade C3", function () {
 
 	after(async function () {
 		await server.stop();
+		await clearDisk();
 	});
 
 	describe("PUT", function () {
