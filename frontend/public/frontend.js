@@ -1,5 +1,8 @@
-document.getElementById("click-me-button").addEventListener("click", handleClickMe);
+document.getElementById("add-button").addEventListener("click", handleAddClick);
 
-function handleClickMe() {
-	alert("Button Clicked!");
+function handleAddClick() {
+	open("../addMenu.html", "", "popup=true, width=500, height=100");
 }
+
+
+

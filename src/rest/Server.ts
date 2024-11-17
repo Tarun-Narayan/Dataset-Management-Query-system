@@ -32,7 +32,7 @@ export default class Server {
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
 		// accessible at http://localhost:<port>/
-		// this.express.use(express.static("./frontend/public"))
+		this.express.use(express.static("./frontend/public"))
 	}
 
 	/**
@@ -127,7 +127,7 @@ export default class Server {
 			}
 		} catch (err) {
 			// return all other errors
-			Log.error(err);
+			Log.error(`${err}`);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 		}
 	}
