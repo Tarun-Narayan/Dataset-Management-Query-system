@@ -45,7 +45,7 @@ async function loadDatasets() {
 		alert("Failed to load datasets. Try again." + `${error}`);
 	}
 }
-window.loadDatasets = loadDatasets();
+window.loadDatasets = loadDatasets;
 
 
 // Handle Dataset Click
