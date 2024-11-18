@@ -1,7 +1,7 @@
 document.getElementById("add-button").addEventListener("click", handleAddClick);
 
 function handleAddClick() {
-	open("../addMenu.html", "", "popup=true, width=500, height=150");
+	window.open("../addMenu.html", "", "popup=true, width=500, height=150");
 }
 
 
@@ -42,9 +42,10 @@ async function loadDatasets() {
 		}
 	} catch (error) {
 		console.error("Error loading datasets:", error);
-		alert("Failed to load datasets. Try again.");
+		alert("Failed to load datasets. Try again." + `${error}`);
 	}
 }
+window.loadDatasets = loadDatasets;
 
 
 // Handle Dataset Click

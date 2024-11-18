@@ -42,16 +42,18 @@
 				return;
 			}
 
-			const url = `/dataset/${datasetName}/${kind}`;
+			const url = `http://localhost:4321/dataset/${datasetName}/${kind}`;
 			const xhr = new XMLHttpRequest();
 
 			xhr.open("PUT", url, true);
-			xhr.setRequestHeader("Content-Type", "application/zip");
+			xhr.setRequestHeader("Content-Type", "application/x-zip-compressed");
 
-			xhr.onreadystatechange = function () {
+			xhr.onreadystatechange = async function () {
 				if (xhr.readyState === XMLHttpRequest.DONE) {
 					if (xhr.status === 200) {
 						alert("Dataset added successfully!");
+						await window.opener.loadDatasets();
+						window.close();
 					} else {
 						alert(`Error adding dataset: ${xhr.response}`);
 					}
