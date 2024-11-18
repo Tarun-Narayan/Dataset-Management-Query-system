@@ -6,7 +6,6 @@ import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
 
 import { InsightDatasetKind, InsightError, NotFoundError } from "../controller/IInsightFacade";
-import * as fs from "fs-extra";
 
 const kindMap: Record<string, InsightDatasetKind> = {
 	sections: InsightDatasetKind.Sections,
@@ -32,7 +31,7 @@ export default class Server {
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
 		// accessible at http://localhost:<port>/
-		this.express.use(express.static("./frontend/public"))
+		this.express.use(express.static("./frontend/public"));
 	}
 
 	/**
@@ -107,26 +106,34 @@ export default class Server {
 
 	private static async add(req: Request, res: Response): Promise<void> {
 		try {
-			// parse fields
+			// Parse fields
 			const id = req.params.id;
 			const kindString = req.params.kind.toLowerCase();
 			const kind = kindMap[kindString];
-			const buffer = await fs.readFile("test/resources/archives/" + req.body.toString());
-			const content = buffer.toString("base64");
 
-			// retrieve result
-			if (kind) {
-				// return valid result
-				const result = await Server.facade.addDataset(id, content, kind);
-				Log.info("Dataset: '" + id + "' has been successfully added");
-				res.status(StatusCodes.OK).json({ result: result });
-			} else {
-				// return error for invalid kind
+			// Validate the kind
+			if (!kind) {
 				Log.error("Inputted kind type does not exist");
 				res.status(StatusCodes.BAD_REQUEST).json({ error: "Inputted kind type does not exist" });
+				return;
 			}
+
+			// Validate the file
+			if (!req.body || !(req.body instanceof Buffer)) {
+				Log.error("File data not received or not in the correct format");
+				res.status(StatusCodes.BAD_REQUEST).json({ error: "File data is missing or invalid" });
+				return;
+			}
+
+			// Convert the file buffer to Base64
+			const content = req.body.toString("base64");
+
+			// Process the dataset
+			const result = await Server.facade.addDataset(id, content, kind);
+			Log.info("Dataset: '" + id + "' has been successfully added");
+			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
-			// return all other errors
+			// Handle errors
 			Log.error(`${err}`);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 		}

@@ -2,12 +2,69 @@
 <html lang="">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-	<title>310 Frontend</title>
+	<title>Add Menu</title>
 	<link href="/style.css" rel="stylesheet"/>
 </head>
 <body>
-<button id="choose-button" class="button">Choose file</button>
+<form id="datasetForm">
+	<label for="enterID">Enter dataset name:</label>
+	<input type="text" id="enterID" name="enterID">
+	<br>
+	<br>
 
+	<label for="chooseFile">Select file for dataset:</label>
+	<input type="file" id="chooseFile" name="chooseFile" >
+	<br>
+	<br>
+
+	<label for="chooseKind">Choose dataset kind:</label>
+	<select name="chooseKind" id="chooseKind">
+		<option value="sections">Sections</option>
+		<option value="rooms">Rooms</option>
+	</select>
+	<br>
+	<br>
+
+	<button type="button" id="submitDataset">Submit Dataset</button>
+</form>
 <script type="text/javascript" src="/frontend.js"></script>
+<script type="text/javascript">
+	document.getElementById("submitDataset").addEventListener("click", async () => {
+		try {
+			const datasetName = document.getElementById("enterID").value.toString();
+			const kind = document.getElementById("chooseKind").value.toString();
+
+			const fileInput = document.getElementById("chooseFile");
+			const file = fileInput.files[0];
+
+			if (!file) {
+				alert("Please select a file before submitting.");
+				return;
+			}
+
+			const url = `/dataset/${datasetName}/${kind}`;
+			const xhr = new XMLHttpRequest();
+
+			xhr.open("PUT", url, true);
+			xhr.setRequestHeader("Content-Type", "application/zip");
+
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === XMLHttpRequest.DONE) {
+					if (xhr.status === 200) {
+						alert("Dataset added successfully!");
+					} else {
+						alert(`Error adding dataset: ${xhr.response}`);
+					}
+				}
+			};
+
+			// Sending the raw file object as the body of the request
+			xhr.send(file);
+		} catch (error) {
+			alert("An error occurred. Please check fields.");
+			console.error(error);
+		}
+	});
+</script>
 </body>
 </html>
