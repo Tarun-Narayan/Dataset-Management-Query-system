@@ -1,11 +1,10 @@
+const BASE_URL = "http://localhost:4321";
+
 document.getElementById("add-button").addEventListener("click", handleAddClick);
 
 function handleAddClick() {
 	window.open("../addMenu.html", "", "popup=true, width=500, height=150");
 }
-
-
-const BASE_URL = "http://localhost:4321";
 // Removed Datasets Button
 document.getElementById("removed-list-button").addEventListener("click", handleRemovedListClick);
 
@@ -56,6 +55,8 @@ function handleDatasetClick(datasetId) {
 	actionsDiv.style.display = "block";
 	document.getElementById("remove-dataset-button").onclick = () => handleRemoveDataset(datasetId);
 	document.getElementById("insight1-button").onclick = () => handleInsight1(datasetId);
+	// Bar Chart for Sections with Average > User Selected Number
+	document.getElementById("insight2-button").onclick = () => handleInsight2(datasetId);
 }
 
 // Remove Dataset
@@ -142,6 +143,80 @@ function getPieChartData(results) {
 	}
 	return [passTotal, failTotal, auditTotal];
 }
+
+// Bar Chart for sections with average > selected number
+async function handleInsight2(datasetId) {
+	const selectedValue = prompt("Enter a threshold for average:");
+	const threshold = parseFloat(selectedValue);
+
+	if (isNaN(threshold)) {
+		alert("Invalid input. Please enter a numeric value.");
+		return;
+	}
+
+	const query = {
+		WHERE: {
+			GT: {
+				[`${datasetId}_avg`]: threshold
+			}
+		},
+		OPTIONS: {
+			COLUMNS: [
+				`${datasetId}_title`,
+				"avgColumn"
+			],
+			ORDER: {
+				dir: "DOWN",
+				keys: ["avgColumn"]
+			}
+		},
+
+		TRANSFORMATIONS: {
+			GROUP: [
+				`${datasetId}_title`
+			],
+			APPLY: [
+				{
+					avgColumn: {
+						MAX: `${datasetId}_avg`
+					}
+				}
+			]
+		}
+	};
+
+	try {
+		const response = await fetch(`${BASE_URL}/query`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(query)
+		});
+
+		if (!response.ok) {
+			alert(`Error querying dataset: ${await response.text()}`);
+		} else {
+			const data = await response.json();
+			const queryResults = data.result;
+			const fields = JSON.stringify(getBarChartData(queryResults, datasetId));
+			window.location.href = `../insight2.html?queryResult2=${encodeURIComponent(fields)}`;
+		}
+	} catch (e) {
+		console.error("Error querying dataset: " + e);
+	}
+}
+
+function getBarChartData(results, datasetId) {
+	let titles = [];
+	let averages = [];
+	for (const result of results) {
+		titles.push(result[`${datasetId}_title`]);
+		averages.push(result.avgColumn);
+	}
+	return [titles, averages];
+}
+
+
+
 
 // Load datasets
 window.onload = async () => {
