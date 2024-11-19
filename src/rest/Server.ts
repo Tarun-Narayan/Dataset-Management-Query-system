@@ -8,8 +8,8 @@ import InsightFacade from "../controller/InsightFacade";
 import { InsightDatasetKind, InsightError, NotFoundError } from "../controller/IInsightFacade";
 
 const kindMap: Record<string, InsightDatasetKind> = {
-	sections: InsightDatasetKind.Sections,
-	rooms: InsightDatasetKind.Rooms,
+	section: InsightDatasetKind.Sections,
+	room: InsightDatasetKind.Rooms,
 };
 
 export default class Server {
@@ -131,11 +131,11 @@ export default class Server {
 			// Process the dataset
 			const result = await Server.facade.addDataset(id, content, kind);
 			Log.info("Dataset: '" + id + "' has been successfully added");
-			res.status(StatusCodes.OK).json({ result: result });
+			res.status(StatusCodes.OK).json({ result: `${result}` });
 		} catch (err) {
 			// Handle errors
 			Log.error(`${err}`);
-			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+			res.status(StatusCodes.BAD_REQUEST).json({ error: `${err}` });
 		}
 	}
 
@@ -163,9 +163,12 @@ export default class Server {
 	private static async performQ(req: Request, res: Response): Promise<void> {
 		try {
 			const query = req.body;
+			Log.info(query);
 			const result = await Server.facade.performQuery(query);
+			Log.info(`Dataset: has been successfully queried`);
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
+			Log.error(`${err}`);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
 		}
 	}

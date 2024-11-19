@@ -10,9 +10,6 @@ const MAX_SIZE = 5000;
 export async function getResults(query: Query): Promise<InsightResult[]> {
 	const dataset = await getDataset(query);
 	const sections = await getSections(query.WHERE, dataset);
-	if (sections.size > MAX_SIZE) {
-		throw new ResultTooLargeError(`Query Result size exceeded: ` + `${MAX_SIZE}`);
-	}
 
 	let objects = await getResultObject(query.OPTIONS, Array.from(sections));
 	if (query.TRANSFORMATIONS) {
@@ -27,6 +24,10 @@ export async function getResults(query: Query): Promise<InsightResult[]> {
 		}
 	}
 
+	if (objects.length > MAX_SIZE) {
+		throw new ResultTooLargeError(`Query Result size exceeded: ` + `${MAX_SIZE}`);
+	}
+
 	resultsMap.clear();
 	return objects;
 }
@@ -35,7 +36,19 @@ export async function getDataset(
 	query: Query
 ): Promise<{ id: string; kind: InsightDatasetKind; numRows: number; sections: any[] }> {
 	try {
-		const keyToParse = query.OPTIONS.COLUMNS[0];
+		let keyToParse;
+		if (query.TRANSFORMATIONS) {
+			keyToParse = await Promise.any(query.TRANSFORMATIONS.GROUP.map((key) => {
+				if (key.includes("_")) {
+					return key;
+				}
+			}));
+		} else {
+			keyToParse = query.OPTIONS.COLUMNS[0];
+		}
+		if (!keyToParse) {
+			throw new InsightError("Did not locate reference ID");
+		}
 		const id = keyToParse.split("_", 1)[0];
 
 		const filePath = path.join("./data", `${id}.json`);
