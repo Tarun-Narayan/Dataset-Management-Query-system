@@ -57,6 +57,7 @@ function handleDatasetClick(datasetId) {
 	document.getElementById("insight1-button").onclick = () => handleInsight1(datasetId);
 	// Bar Chart for Sections with Average > User Selected Number
 	document.getElementById("insight2-button").onclick = () => handleInsight2(datasetId);
+	document.getElementById("insight3-button").onclick = () => handleInsight3(datasetId);
 }
 
 // Remove Dataset
@@ -213,6 +214,75 @@ function getBarChartData(results, datasetId) {
 		averages.push(result.avgColumn);
 	}
 	return [titles, averages];
+}
+
+//Line Chart for subject average over the years
+async function handleInsight3(datasetId) {
+	const selectedCourse = prompt("Enter the course Subject to view its average over the years:");
+
+	if (!selectedCourse || selectedCourse.trim() === "") {
+		alert("Invalid course title. Please try again.");
+		return;
+	}
+
+	const query = {
+		WHERE: {
+			IS: {
+				[`${datasetId}_dept`]: selectedCourse.trim()
+			}
+		},
+		OPTIONS: {
+			COLUMNS: [
+				`${datasetId}_year`,
+				"avgColumn"
+			],
+			ORDER: {
+				dir: "UP",
+				keys: [`${datasetId}_year`]
+			}
+		},
+		TRANSFORMATIONS: {
+			GROUP: [
+				`${datasetId}_year`
+			],
+			APPLY: [
+				{
+					avgColumn: {
+						AVG: `${datasetId}_avg`
+					}
+				}
+			]
+		}
+	};
+
+	try {
+		const response = await fetch(`${BASE_URL}/query`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(query)
+		});
+
+		if (!response.ok) {
+			alert(`Error querying dataset: ${await response.text()}`);
+		} else {
+			const data = await response.json();
+			const queryResults = data.result;
+			const fields = JSON.stringify(getLineChartData(queryResults, datasetId));
+			window.location.href = `../insight3.html?queryResult3=${encodeURIComponent(fields)}`;
+		}
+	} catch (e) {
+		console.error("Error querying dataset: " + e);
+	}
+}
+
+function getLineChartData(results, datasetId) {
+	let years = [];
+	let averages = [];
+	for (const result of results) {
+		years.push(result[`${datasetId}_year`]);
+		averages.push(result.avgColumn);
+	}
+	return [years, averages];
 }
 
 
