@@ -7,7 +7,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<h1>Average Over Years for Selected Course</h1>
+<h1 id="courseHeading"></h1>
 <canvas id="lineChart" width="800" height="400"></canvas>
 
 <script>
@@ -15,6 +15,10 @@
 	const queryResult = JSON.parse(urlParams.get("queryResult3"));
 	const years = queryResult[0];
 	const averages = queryResult[1];
+	const selectedCourse = urlParams.get("selectedCourse");
+	if (selectedCourse) {
+		document.getElementById("courseHeading").textContent = `Average Over Years for Selected Subject/Department: ${selectedCourse}`;
+	}
 
 	const ctx = document.getElementById("lineChart");
 	new Chart(ctx, {
@@ -42,4 +46,3 @@
 <button onclick="window.location.href='../index.html'">Back to Dashboard</button>
 </body>
 </html>
-

@@ -199,7 +199,7 @@ async function handleInsight2(datasetId) {
 			const data = await response.json();
 			const queryResults = data.result;
 			const fields = JSON.stringify(getBarChartData(queryResults, datasetId));
-			window.location.href = `../insight2.html?queryResult2=${encodeURIComponent(fields)}`;
+			window.location.href = `../insight2.html?queryResult2=${encodeURIComponent(fields)}&selectedValue=${encodeURIComponent(selectedValue)}`;
 		}
 	} catch (e) {
 		console.error("Error querying dataset: " + e);
@@ -218,7 +218,7 @@ function getBarChartData(results, datasetId) {
 
 //Line Chart for subject average over the years
 async function handleInsight3(datasetId) {
-	const selectedCourse = prompt("Enter the course Subject to view its average over the years:");
+	const selectedCourse = prompt("Enter the course Subject/department to view its average over the years:");
 
 	if (!selectedCourse || selectedCourse.trim() === "") {
 		alert("Invalid course title. Please try again.");
@@ -268,7 +268,8 @@ async function handleInsight3(datasetId) {
 			const data = await response.json();
 			const queryResults = data.result;
 			const fields = JSON.stringify(getLineChartData(queryResults, datasetId));
-			window.location.href = `../insight3.html?queryResult3=${encodeURIComponent(fields)}`;
+			window.location.href = `../insight3.html?queryResult3=${encodeURIComponent(fields)}&selectedCourse=${encodeURIComponent(selectedCourse)}`;
+
 		}
 	} catch (e) {
 		console.error("Error querying dataset: " + e);
