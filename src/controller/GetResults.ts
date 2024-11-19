@@ -38,11 +38,13 @@ export async function getDataset(
 	try {
 		let keyToParse;
 		if (query.TRANSFORMATIONS) {
-			keyToParse = await Promise.any(query.TRANSFORMATIONS.GROUP.map((key) => {
-				if (key.includes("_")) {
-					return key;
-				}
-			}));
+			keyToParse = await Promise.any(
+				query.TRANSFORMATIONS.GROUP.map((key) => {
+					if (key.includes("_")) {
+						return key;
+					}
+				})
+			);
 		} else {
 			keyToParse = query.OPTIONS.COLUMNS[0];
 		}
