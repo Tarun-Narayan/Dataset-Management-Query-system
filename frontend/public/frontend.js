@@ -55,7 +55,7 @@ function handleDatasetClick(datasetId) {
 	selectedDataset.textContent = datasetId;
 	actionsDiv.style.display = "block";
 	document.getElementById("remove-dataset-button").onclick = () => handleRemoveDataset(datasetId);
-	document.getElementById("insights-button").onclick = () => handleViewInsights(datasetId);
+	document.getElementById("insight1-button").onclick = () => handleInsight1(datasetId);
 }
 
 // Remove Dataset
@@ -76,9 +76,57 @@ async function handleRemoveDataset(datasetId) {
 	}
 }
 
-// View Insights
-function handleViewInsights(datasetId) {
-	alert(`Viewing insights for "${datasetId}"`);
+// View Insight Pass/Fail/Audit Insights
+async function handleInsight1(datasetId) {
+	const query = {
+		WHERE: {
+
+		},
+		OPTIONS: {
+			COLUMNS: [
+				"sumFail",
+				"sumPass",
+				"sumAudit"
+			]
+		},
+		TRANSFORMATIONS: {
+			GROUP: [
+				`${datasetId}_year`
+			],
+			APPLY: [
+				{
+					sumFail: {
+						SUM: `${datasetId}_fail`
+					}
+				},
+				{
+					sumPass: {
+						SUM: `${datasetId}_pass`
+					}
+				},
+				{
+					sumAudit: {
+						SUM: `${datasetId}_audit`
+					}
+				}
+			]
+		}
+	};
+	try {
+		const response = await fetch(`${BASE_URL}/query`, {
+			method: "POST",
+			headers: {"Content-Type": "application/json"},
+			body: JSON.stringify(query)
+		})
+		if (!response.ok) {
+			alert(`Error querying dataset: ${await response.text()}`);
+		} else {
+			window.location.href = `../insight1.html?queryResult=${encodeURIComponent(response.body["result"])}`;
+		}
+
+	} catch (e) {
+		console.error("Error querying dataset: " + e);
+	}
 }
 
 // Load datasets

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+	<title>Removed Datasets</title>
+	<link href="/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div>
+	<canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+	const urlParams = new URLSearchParams(window.location.search);
+	const dataToParse = urlParams.get('queryResult');
+
+	const ctx = document.getElementById('myChart');
+
+	new Chart(ctx, {
+		type: 'pie',
+		data: {
+			labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+			datasets: [{
+				label: '# of Votes',
+				data: [12, 19, 3, 5, 2, 3],
+				borderWidth: 1
+			}]
+		}
+	});
+</script>
+<button onclick="window.location.href='../index.html'">Back to Dashboard</button>
+</body>
+</html>
