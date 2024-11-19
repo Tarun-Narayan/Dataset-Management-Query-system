@@ -121,12 +121,26 @@ async function handleInsight1(datasetId) {
 		if (!response.ok) {
 			alert(`Error querying dataset: ${await response.text()}`);
 		} else {
-			window.location.href = `../insight1.html?queryResult=${encodeURIComponent(response.body["result"])}`;
+			const data = await response.json();
+			const queryResults = data.result;
+			const fields = JSON.stringify(getPieChartData(queryResults));
+			window.location.href = `../insight1.html?queryResult=${encodeURIComponent(fields)}`;
 		}
 
 	} catch (e) {
 		console.error("Error querying dataset: " + e);
 	}
+}
+function getPieChartData(results) {
+	let passTotal = 0;
+	let failTotal = 0;
+	let auditTotal = 0;
+	for (const result of results) {
+		passTotal += result.sumPass;
+		failTotal += result.sumFail;
+		auditTotal += result.sumAudit;
+	}
+	return [passTotal, failTotal, auditTotal];
 }
 
 // Load datasets
