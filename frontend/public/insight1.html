@@ -2,31 +2,57 @@
 <html lang="">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
-	<title>Removed Datasets</title>
+	<title>Pass/Fail/Audit Insight</title>
 	<link href="/style.css" rel="stylesheet"/>
 </head>
 <body>
 <div>
 	<canvas id="myChart"></canvas>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-	const urlParams = new URLSearchParams(window.location.search);
-	const dataToParse = urlParams.get('queryResult');
+	const queryParams = new URLSearchParams(window.location.search);
+	const queryResult = JSON.parse(queryParams.get("queryResult"));
+
+	const passValue = queryResult[0];
+	const failValue = queryResult[1];
+	const auditValue = queryResult[2];
+	const total = passValue + failValue + auditValue;
+
+	const passPercent = String(((passValue / total) * 100).toFixed(1));
+	const failPercent = String(((failValue / total) * 100).toFixed(1));
+	const auditPercent = String(((auditValue / total) * 100).toFixed(1));
 
 	const ctx = document.getElementById('myChart');
 
 	new Chart(ctx, {
 		type: 'pie',
 		data: {
-			labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+			labels: [`Passed ${passPercent}%`, `Failed ${failPercent}%`, `Audited ${auditPercent}%`],
 			datasets: [{
-				label: '# of Votes',
-				data: [12, 19, 3, 5, 2, 3],
+				label: 'Number of Students',
+				data: [passValue, failValue, auditValue],
 				borderWidth: 1
 			}]
+		},
+		options: {
+			radius: "75%",
+			plugins: {
+				legend: {
+					title: {
+						text: "Select field to disable",
+						display: true,
+						color: `#b53f3f`,
+						position: 'bottom'
+					}
+				},
+				title: {
+					display: true,
+					color: `#3f51b5`,
+					text: "Pie Chart of Passed/Failed/Audited Students"
+				}
+			}
 		}
 	});
 </script>
