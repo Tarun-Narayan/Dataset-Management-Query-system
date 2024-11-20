@@ -16,9 +16,15 @@
 	const years = queryResult[0];
 	const averages = queryResult[1];
 	const selectedCourse = urlParams.get("selectedCourse");
-	if (selectedCourse) {
-		document.getElementById("courseHeading").textContent = `Average Over Years for Selected Subject/Department: ${selectedCourse}`;
+	if (!averages || averages.length === 0) {
+		alert("No results for selected query");
+		window.location.href = "../index.html";
+	} else{
+		if (selectedCourse) {
+			document.getElementById("courseHeading").textContent = `Average Over Years for Selected Subject/Department: ${selectedCourse}`;
+		}
 	}
+
 
 	const ctx = document.getElementById("lineChart");
 	new Chart(ctx, {
