@@ -4,6 +4,8 @@ import Log from "@ubccpsc310/folder-test/build/Log";
 import * as http from "http";
 import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
+import fs from "fs/promises";
+import path from "path";
 
 import { InsightDatasetKind, InsightError, NotFoundError } from "../controller/IInsightFacade";
 
@@ -143,6 +145,24 @@ export default class Server {
 			const id = req.params.id;
 			const result = await Server.facade.removeDataset(id);
 			Log.info(`Dataset: '${id}' has been successfully removed`);
+
+			// Save the removed dataset ID to a file
+			const filePath = path.resolve(__dirname, "../../frontend/public/removed-datasets.json");
+			const num = 2;
+			try {
+				const data = await fs.readFile(filePath, "utf-8");
+				const removedList = JSON.parse(data);
+				removedList.push(id);
+				await fs.writeFile(filePath, JSON.stringify(removedList, null, num));
+			} catch (error) {
+				// @ts-ignore
+				if (error.code === "ENOENT") {
+					await fs.writeFile(filePath, JSON.stringify([id], null, num));
+				} else {
+					throw error;
+				}
+			}
+
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
 			if (err instanceof NotFoundError) {
