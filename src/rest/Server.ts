@@ -130,10 +130,9 @@ export default class Server {
 
 			// Process the dataset
 			const result = await Server.facade.addDataset(id, content, kind);
-			Log.info("Dataset: '" + id + "' has been successfully added");
-			res.status(StatusCodes.OK).json({ result: `${result}` });
+			Log.info(`Dataset: '${id}' has been successfully added`);
+			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
-			// Handle errors
 			Log.error(`${err}`);
 			res.status(StatusCodes.BAD_REQUEST).json({ error: `${err}` });
 		}
@@ -146,16 +145,15 @@ export default class Server {
 			Log.info(`Dataset: '${id}' has been successfully removed`);
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
-			const id = req.params.id;
 			if (err instanceof NotFoundError) {
-				Log.error(`Dataset: '${id}' not found`);
-				res.status(StatusCodes.NOT_FOUND).json({ error: err });
+				Log.error(`Dataset: '${req.params.id}' not found`);
+				res.status(StatusCodes.NOT_FOUND).json({ error: `${err}` });
 			} else if (err instanceof InsightError) {
 				Log.error(`Error removing dataset: ${err}`);
-				res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+				res.status(StatusCodes.BAD_REQUEST).json({ error: `${err}` });
 			} else {
 				Log.error(`Unexpected error: ${err}`);
-				res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+				res.status(StatusCodes.BAD_REQUEST).json({ error: `${err}` });
 			}
 		}
 	}
@@ -165,11 +163,11 @@ export default class Server {
 			const query = req.body;
 			Log.info(query);
 			const result = await Server.facade.performQuery(query);
-			Log.info(`Dataset: has been successfully queried`);
+			Log.info(`Query has been successfully performed`);
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
 			Log.error(`${err}`);
-			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+			res.status(StatusCodes.BAD_REQUEST).json({ error: `${err}` });
 		}
 	}
 
@@ -180,7 +178,7 @@ export default class Server {
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
 			Log.error(`Error listing datasets: ${err}`);
-			res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+			res.status(StatusCodes.BAD_REQUEST).json({ error: `${err}` });
 		}
 	}
 

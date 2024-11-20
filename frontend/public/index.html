@@ -1,27 +1,39 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
 	<title>Sections's Insights UBC Main Page</title>
+
+	<!-- Material Design CSS -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link href="/materialize.css" rel="stylesheet">
 	<link href="/style.css" rel="stylesheet"/>
 </head>
-<body>
-<h1>Dataset Dashboard</h1>
-<button id="add-button" class="button1">Add Dataset</button>
-<button id="removed-list-button" class="button1">Removed Datasets List</button>
+<body class="container">
 
-<h2>Existing Datasets</h2>
-<ul id="dataset-list">
-</ul>
+<h1 class="center-align">Dataset Dashboard</h1>
 
-<div id="dataset-actions" style="display: none;">
-	<h3>Selected Dataset: <span id="selected-dataset"></span></h3>
-	<button id="remove-dataset-button" class="button1">Remove Dataset</button>
-	<button id="insight1-button" class = "button1">Pass/Fail/Audit Insight</button>
-	<button id="insight2-button" class = "button1">High performing Sections Insight</button>
-	<button id="insight3-button" class = "button1">Subject's avg over the years</button>
+<div class="row center-align">
+	<button id="add-button" class="btn waves-effect waves-light">Add Dataset</button>
+	<button id="removed-list-button" class="btn waves-effect waves-light red darken-2">Removed Datasets List</button>
 </div>
 
+<h2 class="section">Existing Datasets</h2>
+<ul id="dataset-list" class="collection">
+</ul>
+
+<div id="dataset-actions" style="display: none;" class="card-panel teal lighten-4">
+	<h3 class="card-title">Selected Dataset: <span id="selected-dataset" class="blue-text"></span></h3>
+	<div class="row center-align">
+		<button id="remove-dataset-button" class="btn waves-effect waves-light red">Remove Dataset</button>
+		<button id="insight1-button" class="btn waves-effect waves-light">Pass/Fail/Audit Insight</button>
+		<button id="insight2-button" class="btn waves-effect waves-light">High performing Sections Insight</button>
+		<button id="insight3-button" class="btn waves-effect waves-light">Subject's Avg Over the Years</button>
+	</div>
+</div>
+
+
+<script src="/materialize.css"></script>
 <script type="text/javascript" src="/frontend.js"></script>
 </body>
 </html>

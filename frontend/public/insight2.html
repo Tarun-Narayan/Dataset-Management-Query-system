@@ -1,48 +1,57 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Insight 2: Bar Chart</title>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 <body>
 <h1 id="thresholdHeading"></h1>
 <canvas id="barChart" width="800" height="400"></canvas>
 
 <script>
+	// Parse query parameters
 	const urlParams = new URLSearchParams(window.location.search);
 	const queryResult = JSON.parse(urlParams.get("queryResult2"));
 	const courseTitle = queryResult[0];
 	const courseAvg = queryResult[1];
 	const selectedThreshold = urlParams.get("selectedValue");
-	if (selectedThreshold) {
-		document.getElementById("thresholdHeading").textContent = `Sections with Average Greater Than Selected Threshold: ${selectedThreshold}`;
-	}
-	const ctx = document.getElementById("barChart").getContext("2d");
-	new Chart(ctx, {
-		type: "bar",
-		data: {
-			labels: courseTitle,
-			datasets: [{
-				label: "Average Score",
-				data: courseAvg,
-				backgroundColor: "rgba(75, 192, 192, 0.6)",
-				borderColor: "rgba(75, 192, 192, 1)",
-				borderWidth: 1
-			}]
-		},
-		options: {
-			scales: {
-				y: {
-					beginAtZero: true
+
+	// Check if courseAvg is empty
+	if (!courseAvg || courseAvg.length === 0) {
+		alert("No results for selected query");
+		window.location.href = "../index.html";
+	} else {
+		if (selectedThreshold) {
+			document.getElementById("thresholdHeading").textContent = `Sections with Average Greater Than Selected Threshold: ${selectedThreshold}`;
+		}
+
+		const ctx = document.getElementById("barChart").getContext("2d");
+		new Chart(ctx, {
+			type: "bar",
+			data: {
+				labels: courseTitle,
+				datasets: [{
+					label: "Average Score",
+					data: courseAvg,
+					backgroundColor: "rgba(75, 192, 192, 0.6)",
+					borderColor: "rgba(75, 192, 192, 1)",
+					borderWidth: 1
+				}]
+			},
+			options: {
+				scales: {
+					y: {
+						beginAtZero: true
+					}
 				}
 			}
-		}
-	});
+		});
+	}
 </script>
+
 <button onclick="window.location.href='../index.html'">Back to Dashboard</button>
+
 </body>
 </html>
-
