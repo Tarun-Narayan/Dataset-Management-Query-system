@@ -6,64 +6,101 @@
 	<link href="/style.css" rel="stylesheet"/>
 </head>
 <body>
-<form id="datasetForm">
-	<label for="enterID">Enter dataset name:</label>
-	<input type="text" id="enterID" name="enterID">
-	<br>
-	<br>
+<div id="datasetsContainer">
+	<form id="datasetForm-1" class="datasetForm">
+		<label for="enterID-1">Enter dataset name:</label>
+		<input type="text" id="enterID-1" name="enterID">
+		<br><br>
 
-	<label for="chooseFile">Select file for dataset:</label>
-	<input type="file" id="chooseFile" name="chooseFile" >
-	<br>
-	<br>
+		<label for="chooseFile-1">Select file for dataset:</label>
+		<input type="file" id="chooseFile-1" name="chooseFile">
+		<br><br>
 
-	<label for="chooseKind">Choose dataset kind:</label>
-	<select name="chooseKind" id="chooseKind">
-		<option value="section">Sections</option>
-		<option value="room">Rooms</option>
-	</select>
-	<br>
-	<br>
+		<label for="chooseKind-1">Choose dataset kind:</label>
+		<select name="chooseKind" id="chooseKind-1">
+			<option value="section">Sections</option>
+			<option value="room">Rooms</option>
+		</select>
+		<br><br>
+	</form>
+</div>
+<button type="button" id="addDatasetForm">+</button>
+<button type="button" id="submitAllDatasets">Submit All Datasets</button>
 
-	<button type="button" id="submitDataset">Submit Dataset</button>
-</form>
 <script type="text/javascript" src="/frontend.js"></script>
 <script type="text/javascript">
-	document.getElementById("submitDataset").addEventListener("click", async () => {
+	let datasetCounter = 1;
+
+	// Add a new dataset form
+	document.getElementById("addDatasetForm").addEventListener("click", () => {
+		datasetCounter++;
+
+		const datasetsContainer = document.getElementById("datasetsContainer");
+
+		const newForm = document.createElement("form");
+		newForm.setAttribute("id", `datasetForm-${datasetCounter}`);
+		newForm.setAttribute("class", "datasetForm");
+
+		newForm.innerHTML = `
+				<br>
+                <label for="enterID-${datasetCounter}">Enter dataset name:</label>
+                <input type="text" id="enterID-${datasetCounter}" name="enterID">
+                <br><br>
+
+                <label for="chooseFile-${datasetCounter}">Select file for dataset:</label>
+                <input type="file" id="chooseFile-${datasetCounter}" name="chooseFile">
+                <br><br>
+
+                <label for="chooseKind-${datasetCounter}">Choose dataset kind:</label>
+                <select name="chooseKind" id="chooseKind-${datasetCounter}">
+                    <option value="section">Sections</option>
+                    <option value="room">Rooms</option>
+                </select>
+                <br><br>
+            `;
+
+		datasetsContainer.appendChild(newForm);
+	});
+
+	// Submit all datasets
+	document.getElementById("submitAllDatasets").addEventListener("click", async () => {
 		try {
-			const datasetName = document.getElementById("enterID").value.toString();
-			const kind = document.getElementById("chooseKind").value.toString();
+			for (let i = 1; i <= datasetCounter; i++) {
+				const datasetName = document.getElementById(`enterID-${i}`).value;
+				const kind = document.getElementById(`chooseKind-${i}`).value;
+				const fileInput = document.getElementById(`chooseFile-${i}`);
+				const file = fileInput.files[0];
 
-			const fileInput = document.getElementById("chooseFile");
-			const file = fileInput.files[0];
-
-			if (!file) {
-				alert("Please select a file before submitting.");
-				return;
-			}
-
-			const url = `http://localhost:4321/dataset/${datasetName}/${kind}`;
-			const xhr = new XMLHttpRequest();
-
-			xhr.open("PUT", url, true);
-			xhr.setRequestHeader("Content-Type", "application/x-zip-compressed");
-
-			xhr.onreadystatechange = async function () {
-				if (xhr.readyState === XMLHttpRequest.DONE) {
-					if (xhr.status === 200) {
-						alert("Dataset added successfully!");
-						await window.opener.loadDatasets();
-						window.close();
-					} else {
-						alert(`Error adding dataset: ${xhr.response}`);
-					}
+				if (!datasetName || !file) {
+					alert(`Please complete all fields for dataset form ${i} before submitting.`);
+					return;
 				}
-			};
 
-			// Sending the raw file object as the body of the request
-			xhr.send(file);
+				const url = `http://localhost:4321/dataset/${datasetName}/${kind}`;
+				const xhr = new XMLHttpRequest();
+
+				xhr.open("PUT", url, true);
+				xhr.setRequestHeader("Content-Type", "application/x-zip-compressed");
+
+				xhr.onreadystatechange = async function () {
+					if (xhr.readyState === XMLHttpRequest.DONE) {
+						if (xhr.status === 200) {
+							alert(`Dataset ${datasetName} added successfully!`);
+							if (i === datasetCounter) {
+								alert("All datasets submitted successfully!");
+								await window.opener.loadDatasets();
+								window.close();
+							}
+						} else {
+							console.error(`Error adding dataset ${datasetName}: ${xhr.response}`);
+							alert(`Error adding dataset ${datasetName}: ${xhr.response}`);
+						}
+					}
+				};
+				xhr.send(file);
+			}
 		} catch (error) {
-			alert("An error occurred. Please check fields.");
+			alert("An error occurred while submitting datasets. Please check the fields.");
 			console.error(error);
 		}
 	});
