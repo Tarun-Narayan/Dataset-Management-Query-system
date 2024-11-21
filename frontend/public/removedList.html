@@ -1,52 +1,85 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
 <head>
-	<meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Removed Datasets</title>
 	<link href="/style.css" rel="stylesheet"/>
+	<style>
+		/* Additional styling */
+		body {
+			font-family: Arial, sans-serif;
+			margin: 20px;
+			background-color: #f9f9f9;
+			color: #333;
+		}
+		h1 {
+			text-align: center;
+			color: #2c3e50;
+		}
+		ul {
+			list-style-type: none;
+			padding: 0;
+		}
+		li {
+			background: #e8f5e9;
+			margin: 5px 0;
+			padding: 10px;
+			border-radius: 5px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+		}
+		button {
+			display: block;
+			margin: 20px auto;
+			padding: 10px 20px;
+			font-size: 16px;
+			color: white;
+			background-color: #3498db;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+		}
+		button:hover {
+			background-color: #2980b9;
+		}
+	</style>
 </head>
 <body>
 <h1>Removed Datasets</h1>
-<ul id="removed-dataset-list">
-</ul>
+<ul id="removed-dataset-list"></ul>
+
 <script>
 	async function fetchRemovedDatasets() {
 		const removedDatasetList = document.getElementById("removed-dataset-list");
 		removedDatasetList.innerHTML = "";
 
 		try {
-			// Fetch the JSON file
 			const response = await fetch('removed-datasets.json');
 			if (!response.ok) {
 				throw new Error("Failed to load JSON file");
 			}
-
 			const removedDatasets = await response.json();
 
-			// Check if the list is empty
 			if (removedDatasets.length === 0) {
 				const noDataMessage = document.createElement("li");
 				noDataMessage.textContent = "No datasets removed yet.";
 				removedDatasetList.appendChild(noDataMessage);
 			} else {
-				// Populate the list with datasets
-				removedDatasets.forEach((dataset) => {
+				// dataset IDs and time of removal (used ChatGPT for formatting)
+				removedDatasets.forEach(({ id, removedAt }) => {
 					const listItem = document.createElement("li");
-					listItem.textContent = dataset;
+					listItem.innerHTML = `<strong>ID:</strong> ${id} <br> <strong>Removed At:</strong> ${new Date(removedAt).toLocaleString()}`;
 					removedDatasetList.appendChild(listItem);
 				});
 			}
 		} catch (error) {
 			console.error("Error loading removed datasets:", error);
-
-			// Display an error message in the UI
 			const errorMessage = document.createElement("li");
-			errorMessage.textContent = `${error}`;
+			errorMessage.textContent = "Error loading datasets: " + error.message;
 			removedDatasetList.appendChild(errorMessage);
 		}
 	}
-
-	// Call the function to populate the list
 	fetchRemovedDatasets();
 </script>
 
