@@ -144,24 +144,16 @@ export default class Server {
 		try {
 			const id = req.params.id;
 			const result = await Server.facade.removeDataset(id);
-			Log.info(`Dataset: '${id}' has been successfully removed`);
-
-			// Save the removed dataset ID to a file
 			const filePath = path.resolve(__dirname, "../../frontend/public/removed-datasets.json");
 			const num = 2;
-			try {
-				const data = await fs.readFile(filePath, "utf-8");
-				const removedList = JSON.parse(data);
-				removedList.push(id);
-				await fs.writeFile(filePath, JSON.stringify(removedList, null, num));
-			} catch (error) {
-				// @ts-ignore
-				if (error.code === "ENOENT") {
-					await fs.writeFile(filePath, JSON.stringify([id], null, num));
-				} else {
-					throw error;
-				}
-			}
+			const timestamp = new Date().toISOString();
+			const entry = { id, removedAt: timestamp };
+
+			const data = await fs.readFile(filePath, "utf-8");
+			const removedList = JSON.parse(data);
+			removedList.push(entry);
+			await fs.writeFile(filePath, JSON.stringify(removedList, null, num));
+
 
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
@@ -177,6 +169,7 @@ export default class Server {
 			}
 		}
 	}
+
 
 	private static async performQ(req: Request, res: Response): Promise<void> {
 		try {
