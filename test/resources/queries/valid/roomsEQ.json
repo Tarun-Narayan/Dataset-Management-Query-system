@@ -1,0 +1,17 @@
+{
+	"title": "Query using ROOMS section (EQ)",
+	"input": {
+		"WHERE": {
+			"EQ": {
+				"rooms_seats": 0
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_name"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": []
+}

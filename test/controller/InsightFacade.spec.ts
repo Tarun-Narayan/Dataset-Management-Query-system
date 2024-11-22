@@ -299,6 +299,8 @@ describe("InsightFacade", function () {
 		it("[valid/complex.json] Very complex valid query", checkQuery);
 		it("[valid/sComparison_test.json] SELECT sections WHERE instructor contains 'pres'", checkQuery);
 		it("[valid/rooms.json] Query using ROOMS section", checkQuery);
+		it("[valid/roomsEQ.json] Query using ROOMS section (EQ)", checkQuery);
+		it("[valid/roomsLT.json] Query using ROOMS section (LT)", checkQuery);
 		it("[valid/empty_input.json] Test empty input to query", checkQuery);
 		it("[valid/empty_result.json] Test empty result to query", checkQuery);
 		it("[valid/transformation.json] Query using a complex transformation", checkQuery);
