@@ -154,7 +154,6 @@ export default class Server {
 			removedList.push(entry);
 			await fs.writeFile(filePath, JSON.stringify(removedList, null, num));
 
-
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
 			if (err instanceof NotFoundError) {
@@ -169,7 +168,6 @@ export default class Server {
 			}
 		}
 	}
-
 
 	private static async performQ(req: Request, res: Response): Promise<void> {
 		try {
