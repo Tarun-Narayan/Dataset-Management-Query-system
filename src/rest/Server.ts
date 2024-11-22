@@ -4,6 +4,8 @@ import Log from "@ubccpsc310/folder-test/build/Log";
 import * as http from "http";
 import cors from "cors";
 import InsightFacade from "../controller/InsightFacade";
+import fs from "fs/promises";
+import path from "path";
 
 import { InsightDatasetKind, InsightError, NotFoundError } from "../controller/IInsightFacade";
 
@@ -142,6 +144,15 @@ export default class Server {
 		try {
 			const id = req.params.id;
 			const result = await Server.facade.removeDataset(id);
+			const filePath = path.resolve(__dirname, "../../frontend/public/removed-datasets.json");
+			const num = 2;
+			const timestamp = new Date().toISOString();
+			const entry = { id, removedAt: timestamp };
+
+			const data = await fs.readFile(filePath, "utf-8");
+			const removedList = JSON.parse(data);
+			removedList.push(entry);
+			await fs.writeFile(filePath, JSON.stringify(removedList, null, num));
 
 			res.status(StatusCodes.OK).json({ result: result });
 		} catch (err) {
