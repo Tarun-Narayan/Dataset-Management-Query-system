@@ -172,14 +172,10 @@ export default class Server {
 	}
 
 	private static async list(_req: Request, res: Response): Promise<void> {
-		try {
 			const result = await Server.facade.listDatasets();
 			Log.info("List of datasets retrieved successfully");
 			res.status(StatusCodes.OK).json({ result: result });
-		} catch (err) {
-			Log.error(`Error listing datasets: ${err}`);
-			res.status(StatusCodes.BAD_REQUEST).json({ error: `${err}` });
-		}
+
 	}
 
 	// The next two methods handle the echo service.
